@@ -20,6 +20,48 @@ interface EquipmentState {
   toggleFavorite: (id: string) => Promise<void>
 }
 
+// Helper function to convert from camelCase to snake_case for database
+const toSnakeCase = (data: any) => {
+  const mapped: any = {}
+  
+  Object.keys(data).forEach(key => {
+    // Map specific fields that need conversion
+    if (key === 'isFavorite') {
+      mapped['is_favorite'] = data[key]
+    } else if (key === 'userId') {
+      mapped['user_id'] = data[key]
+    } else if (key === 'imageUrl') {
+      mapped['image_url'] = data[key]
+    } else if (key === 'purchaseInfo') {
+      mapped['purchase_info'] = data[key]
+    } else if (key === 'createdAt') {
+      mapped['created_at'] = data[key]
+    } else if (key === 'updatedAt') {
+      mapped['updated_at'] = data[key]
+    } else {
+      // Keep other fields as-is
+      mapped[key] = data[key]
+    }
+  })
+  
+  return mapped
+}
+
+// Helper function to convert from snake_case to camelCase from database
+const toCamelCase = (data: any) => {
+  if (!data) return null
+  
+  return {
+    ...data,
+    isFavorite: data.is_favorite,
+    userId: data.user_id,
+    imageUrl: data.image_url,
+    purchaseInfo: data.purchase_info,
+    createdAt: data.created_at,
+    updatedAt: data.updated_at,
+  }
+}
+
 export const useEquipmentStore = create<EquipmentState>((set, get) => ({
   items: [],
   loading: false,
@@ -46,7 +88,10 @@ export const useEquipmentStore = create<EquipmentState>((set, get) => ({
         .order('created_at', { ascending: false })
       
       if (error) throw error
-      set({ items: data || [], loading: false })
+      
+      // Convert snake_case to camelCase
+      const items = (data || []).map(toCamelCase)
+      set({ items, loading: false })
     } catch (error: any) {
       set({ error: error.message, loading: false })
     }
@@ -61,19 +106,25 @@ export const useEquipmentStore = create<EquipmentState>((set, get) => ({
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
+      // Convert camelCase to snake_case for database
+      const dbData = toSnakeCase({
+        ...data,
+        user_id: user.id,
+      })
+
       const { data: newItem, error } = await supabase
         .from('equipment_items')
-        .insert({
-          ...data,
-          user_id: user.id,
-        })
+        .insert(dbData)
         .select()
         .single()
       
       if (error) throw error
       
+      // Convert response back to camelCase
+      const camelCaseItem = toCamelCase(newItem)
+      
       set((state) => ({
-        items: [newItem, ...state.items],
+        items: [camelCaseItem, ...state.items],
         loading: false
       }))
     } catch (error: any) {
@@ -88,18 +139,24 @@ export const useEquipmentStore = create<EquipmentState>((set, get) => ({
     set({ loading: true, error: null })
     
     try {
+      // Convert camelCase to snake_case for database
+      const dbData = toSnakeCase(data)
+      
       const { data: updatedItem, error } = await supabase
         .from('equipment_items')
-        .update(data)
+        .update(dbData)
         .eq('id', id)
         .select()
         .single()
       
       if (error) throw error
       
+      // Convert response back to camelCase
+      const camelCaseItem = toCamelCase(updatedItem)
+      
       set((state) => ({
         items: state.items.map(item => 
-          item.id === id ? updatedItem : item
+          item.id === id ? camelCaseItem : item
         ),
         loading: false
       }))
@@ -138,7 +195,7 @@ export const useEquipmentStore = create<EquipmentState>((set, get) => ({
     if (!item) return
 
     await get().updateEquipment(id, {
-      is_favorite: !item.isFavorite
+      isFavorite: !item.isFavorite
     })
   },
 }))
