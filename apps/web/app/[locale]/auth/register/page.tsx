@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
@@ -13,7 +13,7 @@ export default function RegisterPage() {
   const router = useRouter()
   const params = useParams()
   const locale = params.locale as string
-  const { signUp, signInWithGoogle, signInWithApple, loading, error } = useAuthStore()
+  const { signUp, signInWithGoogle, signInWithApple, loading, error, initializeAuth } = useAuthStore()
   
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -22,6 +22,10 @@ export default function RegisterPage() {
   const [acceptTerms, setAcceptTerms] = useState(false)
   const [validationError, setValidationError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  useEffect(() => {
+    initializeAuth()
+  }, [initializeAuth])
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
