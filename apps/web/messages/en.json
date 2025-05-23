@@ -24,7 +24,8 @@
     "yes": "Yes",
     "no": "No",
     "confirm": "Confirm",
-    "selectLanguage": "Select Language"
+    "selectLanguage": "Select Language",
+    "or": "or"
   },
   "home": {
     "hero": {
