@@ -47,12 +47,12 @@ export default function EquipmentManagementPage() {
 
   const testAuthStatus = async () => {
     try {
-      const response = await fetch('/api/auth/test', {
+      const response = await fetch('/api/auth/debug', {
         credentials: 'include'
       })
       const data = await response.json()
       setAuthStatus(data)
-      console.log('Auth status:', data)
+      console.log('Auth debug info:', data)
     } catch (error) {
       console.error('Auth test failed:', error)
     }
@@ -77,6 +77,9 @@ export default function EquipmentManagementPage() {
     formData.append('file', file)
     
     setUploadError(null)
+    
+    // Refresh auth status before upload
+    await testAuthStatus()
 
     try {
       console.log('Uploading file:', file.name, 'Size:', file.size)
@@ -118,6 +121,8 @@ export default function EquipmentManagementPage() {
     } catch (error) {
       console.error('Upload error:', error)
       setUploadError(error instanceof Error ? error.message : 'Upload failed')
+      // Refresh auth status after error
+      await testAuthStatus()
     }
   }
 
@@ -216,6 +221,12 @@ export default function EquipmentManagementPage() {
           <div className="mb-4 p-4 bg-cs-error/10 text-cs-error rounded-lg">
             <p className="font-semibold">Upload fehlgeschlagen</p>
             <p className="text-sm">{uploadError}</p>
+            {authStatus && (
+              <details className="mt-2">
+                <summary className="cursor-pointer text-xs">Debug Info</summary>
+                <pre className="mt-2 text-xs overflow-auto">{JSON.stringify(authStatus, null, 2)}</pre>
+              </details>
+            )}
           </div>
         )}
 
@@ -334,19 +345,29 @@ export default function EquipmentManagementPage() {
       {/* Header */}
       <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <h1 className="text-3xl font-bold">{t('equipment.title')}</h1>
-        <Button onClick={() => setShowUpload(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          {t('equipment.add.title')}
-        </Button>
+        <div className="flex gap-2">
+          {process.env.NODE_ENV === 'development' && (
+            <Button variant="outline" size="sm" onClick={testAuthStatus}>
+              Refresh Auth
+            </Button>
+          )}
+          <Button onClick={() => setShowUpload(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            {t('equipment.add.title')}
+          </Button>
+        </div>
       </div>
 
       {/* Debug Auth Status - Remove in production */}
       {authStatus && process.env.NODE_ENV === 'development' && (
         <Card className="mb-6 bg-muted/50">
           <CardHeader>
-            <CardTitle className="text-sm">Auth Debug Info</CardTitle>
+            <CardTitle className="text-sm flex items-center justify-between">
+              Auth Debug Info
+              <Button variant="ghost" size="sm" onClick={() => setAuthStatus(null)}>×</Button>
+            </CardTitle>
           </CardHeader>
-          <CardContent className="text-xs font-mono">
+          <CardContent className="text-xs font-mono overflow-auto max-h-64">
             <pre>{JSON.stringify(authStatus, null, 2)}</pre>
           </CardContent>
         </Card>
