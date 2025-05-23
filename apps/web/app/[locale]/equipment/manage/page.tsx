@@ -33,6 +33,7 @@ export default function EquipmentManagementPage() {
   const [uploadMode, setUploadMode] = useState<'single' | 'bulk'>('single')
   const [extractedItems, setExtractedItems] = useState<ExtractedItem[]>([])
   const [searchQuery, setSearchQuery] = useState('')
+  const [uploadError, setUploadError] = useState<string | null>(null)
 
   // Load equipment on mount
   useEffect(() => {
@@ -58,18 +59,27 @@ export default function EquipmentManagementPage() {
   const handleImageUpload = async (file: File) => {
     const formData = new FormData()
     formData.append('file', file)
+    
+    setUploadError(null)
 
     try {
+      console.log('Uploading file:', file.name, 'Size:', file.size)
+      
+      // Important: Include credentials to send cookies
       const response = await fetch('/api/vision/process', {
         method: 'POST',
         body: formData,
+        credentials: 'include', // This ensures cookies are sent
       })
 
+      const result = await response.json()
+      
       if (!response.ok) {
-        throw new Error('Upload failed')
+        console.error('Server error:', result)
+        throw new Error(result.error || `Server error: ${response.status}`)
       }
 
-      const result = await response.json()
+      console.log('Upload successful:', result)
       
       if (result.vision.type === 'receipt') {
         // Multiple items from receipt
@@ -78,13 +88,20 @@ export default function EquipmentManagementPage() {
         setShowUpload(false)
       } else {
         // Single lure item
-        setSelectedItem(result.vision.items[0])
-        setShowForm(true)
-        setShowUpload(false)
+        const item = result.vision.items[0]
+        if (item) {
+          // Add the uploaded image URL to the item
+          item.imageUrl = result.imageUrl
+          setSelectedItem(item)
+          setShowForm(true)
+          setShowUpload(false)
+        } else {
+          throw new Error('No items detected in image')
+        }
       }
     } catch (error) {
       console.error('Upload error:', error)
-      // Show error toast
+      setUploadError(error instanceof Error ? error.message : 'Upload failed')
     }
   }
 
@@ -146,7 +163,10 @@ export default function EquipmentManagementPage() {
         <div className="mb-6">
           <Button
             variant="ghost"
-            onClick={() => setShowUpload(false)}
+            onClick={() => {
+              setShowUpload(false)
+              setUploadError(null)
+            }}
             className="mb-4"
           >
             ← Zurück
@@ -176,6 +196,13 @@ export default function EquipmentManagementPage() {
           </Button>
         </div>
 
+        {uploadError && (
+          <div className="mb-4 p-4 bg-cs-error/10 text-cs-error rounded-lg">
+            <p className="font-semibold">Upload fehlgeschlagen</p>
+            <p className="text-sm">{uploadError}</p>
+          </div>
+        )}
+
         <ImageUpload
           onUpload={handleImageUpload}
           accept="image/*"
@@ -194,6 +221,7 @@ export default function EquipmentManagementPage() {
             onClick={() => {
               setShowUpload(false)
               setShowForm(true)
+              setUploadError(null)
             }}
           >
             Manuell eingeben →
