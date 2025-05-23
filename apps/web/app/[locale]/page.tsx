@@ -6,11 +6,20 @@ import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { LanguageSwitcher } from '@/components/language-switcher'
+import { useAuthStore } from '@/lib/stores/auth-store'
+import { useRouter } from 'next/navigation'
 
 export default function HomePage() {
   const t = useTranslations()
   const params = useParams()
+  const router = useRouter()
   const locale = params.locale as string
+  const { user, signOut } = useAuthStore()
+
+  const handleSignOut = async () => {
+    await signOut()
+    router.refresh()
+  }
 
   return (
     <>
@@ -26,16 +35,31 @@ export default function HomePage() {
           
           <div className="flex items-center gap-4">
             <LanguageSwitcher />
-            <Link href={`/${locale}/login`}>
-              <Button variant="ghost" size="sm">
-                {t('auth.login.submit')}
-              </Button>
-            </Link>
-            <Link href={`/${locale}/register`}>
-              <Button size="sm">
-                {t('auth.register.submit')}
-              </Button>
-            </Link>
+            {user ? (
+              <>
+                <Link href={`/${locale}/equipment`}>
+                  <Button variant="ghost" size="sm">
+                    {t('navigation.equipment')}
+                  </Button>
+                </Link>
+                <Button variant="outline" size="sm" onClick={handleSignOut}>
+                  Sign Out
+                </Button>
+              </>
+            ) : (
+              <>
+                <Link href={`/${locale}/auth/login`}>
+                  <Button variant="ghost" size="sm">
+                    {t('auth.login.submit')}
+                  </Button>
+                </Link>
+                <Link href={`/${locale}/auth/register`}>
+                  <Button size="sm">
+                    {t('auth.register.submit')}
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -60,9 +84,11 @@ export default function HomePage() {
               {t('home.hero.subtitle')}
             </p>
             <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:justify-center sm:gap-6">
-              <Button size="lg" className="w-full sm:w-auto">
-                {t('home.hero.cta.primary')}
-              </Button>
+              <Link href={user ? `/${locale}/equipment` : `/${locale}/auth/register`}>
+                <Button size="lg" className="w-full sm:w-auto">
+                  {t('home.hero.cta.primary')}
+                </Button>
+              </Link>
               <Button size="lg" variant="secondary" className="w-full sm:w-auto">
                 {t('home.hero.cta.secondary')}
               </Button>
@@ -232,9 +258,11 @@ export default function HomePage() {
               {t('home.cta.subtitle')}
             </p>
             <div className="mt-8">
-              <Button size="lg" className="w-full sm:w-auto">
-                {t('home.cta.button')}
-              </Button>
+              <Link href={user ? `/${locale}/equipment` : `/${locale}/auth/register`}>
+                <Button size="lg" className="w-full sm:w-auto">
+                  {t('home.cta.button')}
+                </Button>
+              </Link>
             </div>
             <p className="mt-4 text-sm text-cs-text-muted">
               {t('home.cta.disclaimer')}
