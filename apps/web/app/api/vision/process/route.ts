@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
-// Initialize Brave Search for product images
+// Google Vision API configuration
+const GOOGLE_API_KEY = process.env.GOOGLE_CLOUD_API_KEY!
 const BRAVE_API_KEY = process.env.BRAVE_SEARCH_API_KEY!
 
 interface VisionResult {
@@ -24,11 +25,12 @@ interface ExtractedItem {
 
 export async function POST(request: NextRequest) {
   try {
-    // Check authentication
+    // Check authentication - Fix: use await for async createClient
     const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     
     if (authError || !user) {
+      console.error('Auth error:', authError)
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -40,9 +42,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 })
     }
 
-    // Convert file to buffer
+    // Convert file to base64 for Google Vision API
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
+    const base64Image = buffer.toString('base64')
 
     // Upload to Supabase Storage
     const fileName = `${user.id}/${Date.now()}-${file.name}`
@@ -54,6 +57,7 @@ export async function POST(request: NextRequest) {
       })
 
     if (uploadError) {
+      console.error('Upload error:', uploadError)
       throw new Error(`Upload failed: ${uploadError.message}`)
     }
 
@@ -62,13 +66,24 @@ export async function POST(request: NextRequest) {
       .from('equipment-images')
       .getPublicUrl(fileName)
 
-    // Process with Google Vision API
-    const visionResult = await processWithVision(buffer)
+    // Process with Google Vision REST API
+    let visionResult: VisionResult
 
-    // Use AI to find product images for extracted items
-    for (const item of visionResult.items) {
-      if (!item.imageUrl && item.name) {
-        item.imageUrl = await findProductImage(item)
+    if (GOOGLE_API_KEY) {
+      // Production: Use Google Vision API
+      visionResult = await processWithGoogleVision(base64Image)
+    } else {
+      // Development: Use mock data
+      console.warn('Google Vision API key not configured, using mock data')
+      visionResult = await processWithMockData(base64Image)
+    }
+
+    // Use Brave Search to find product images for extracted items
+    if (BRAVE_API_KEY) {
+      for (const item of visionResult.items) {
+        if (!item.imageUrl && item.name) {
+          item.imageUrl = await findProductImage(item)
+        }
       }
     }
 
@@ -81,36 +96,84 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Vision API error:', error)
     return NextResponse.json(
-      { error: 'Failed to process image' },
+      { error: error instanceof Error ? error.message : 'Failed to process image' },
       { status: 500 }
     )
   }
 }
 
-async function processWithVision(imageBuffer: Buffer): Promise<VisionResult> {
-  // For now, using a mock implementation
-  // In production, this would use Google Cloud Vision API
-  
-  // TODO: Replace with actual Google Vision API calls
-  const mockText = "Rapala Original Floater F11 Silver 11cm"
-  const isReceipt = false
-  
-  if (isReceipt) {
-    return processReceipt(mockText)
-  } else {
-    return processLureImage(mockText)
+async function processWithGoogleVision(base64Image: string): Promise<VisionResult> {
+  try {
+    // Call Google Vision REST API
+    const response = await fetch(
+      `https://vision.googleapis.com/v1/images:annotate?key=${GOOGLE_API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          requests: [{
+            image: { content: base64Image },
+            features: [
+              { type: 'TEXT_DETECTION', maxResults: 10 },
+              { type: 'LABEL_DETECTION', maxResults: 10 },
+              { type: 'LOGO_DETECTION', maxResults: 5 },
+              { type: 'OBJECT_LOCALIZATION', maxResults: 10 }
+            ]
+          }]
+        })
+      }
+    )
+
+    if (!response.ok) {
+      const error = await response.json()
+      throw new Error(`Google Vision API error: ${error.error?.message || response.statusText}`)
+    }
+
+    const data = await response.json()
+    const result = data.responses[0]
+
+    // Extract text
+    const fullText = result.textAnnotations?.[0]?.description || ''
+    const labels = result.labelAnnotations?.map((label: any) => label.description.toLowerCase()) || []
+    const logos = result.logoAnnotations?.map((logo: any) => logo.description) || []
+    
+    // Determine if it's a receipt or direct lure photo
+    const isReceipt = fullText.toLowerCase().includes('rechnung') || 
+                     fullText.toLowerCase().includes('quittung') ||
+                     fullText.toLowerCase().includes('receipt') ||
+                     fullText.toLowerCase().includes('invoice') ||
+                     fullText.toLowerCase().includes('order') ||
+                     labels.includes('receipt') ||
+                     labels.includes('document')
+
+    if (isReceipt) {
+      return processReceipt(fullText, logos)
+    } else {
+      return processLureImage(fullText, labels, logos)
+    }
+  } catch (error) {
+    console.error('Google Vision processing error:', error)
+    // Fallback to mock data if Vision API fails
+    return processWithMockData(base64Image)
   }
 }
 
-async function processReceipt(text: string): Promise<VisionResult> {
+async function processWithMockData(base64Image: string): Promise<VisionResult> {
+  // Mock implementation for development
+  const mockText = "Rapala Original Floater F11 Silver 11cm"
+  return processLureImage(mockText, ['fishing lure', 'wobbler'], ['Rapala'])
+}
+
+function processReceipt(text: string, logos: string[]): VisionResult {
   const items: ExtractedItem[] = []
   
   // Parse receipt text for fishing equipment
   const lines = text.split('\n')
-  const productPattern = /([A-Za-z\s\-]+)\s+(\d+[\.,]\d{2})/
-  const fishingKeywords = ['wobbler', 'spinner', 'köder', 'lure', 'rute', 'rod', 'rolle', 'reel', 'schnur', 'line', 'haken', 'hook', 'bait']
+  const productPattern = /([A-Za-z\s\-]+\w+)\s+(\d+[\.,]\d{2})/
+  const fishingKeywords = ['wobbler', 'spinner', 'köder', 'lure', 'rute', 'rod', 'rolle', 'reel', 'schnur', 'line', 'haken', 'hook', 'bait', 'rapala', 'mepps', 'berkley']
   
-  for (const line of lines) {
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i]
     const lowerLine = line.toLowerCase()
     
     // Check if line contains fishing-related keywords
@@ -119,11 +182,10 @@ async function processReceipt(text: string): Promise<VisionResult> {
       if (match) {
         const [, productName, price] = match
         
-        // Try to extract more details from product name
         const item: ExtractedItem = {
           name: productName.trim(),
           price: parseFloat(price.replace(',', '.')),
-          brand: extractBrand(productName),
+          brand: logos[0] || extractBrand(productName),
           confidence: 0.8
         }
         
@@ -134,7 +196,7 @@ async function processReceipt(text: string): Promise<VisionResult> {
         }
         
         // Extract color if present
-        const colorMatch = productName.match(/(rot|blau|grün|gelb|schwarz|weiß|silber|gold|red|blue|green|yellow|black|white|silver|gold)/i)
+        const colorMatch = productName.match(/(rot|blau|grün|gelb|schwarz|weiß|silber|gold|red|blue|green|yellow|black|white|silver|gold|orange|pink|chartreuse)/i)
         if (colorMatch) {
           item.color = colorMatch[1]
         }
@@ -151,17 +213,22 @@ async function processReceipt(text: string): Promise<VisionResult> {
   }
 }
 
-async function processLureImage(text: string): Promise<VisionResult> {
+function processLureImage(text: string, labels: string[], logos: string[]): VisionResult {
   const items: ExtractedItem[] = []
   
+  // Extract brand from logos
+  const brand = logos[0] || extractBrand(text)
+  
   // Extract product info from text
-  const nameMatch = text.match(/([A-Za-z]+\s+[A-Za-z0-9\s\-]+)/)?.[1]
+  const lines = text.split('\n').filter(line => line.trim())
+  const productName = lines[0] || 'Unbekannter Köder'
+  
   const sizeMatch = text.match(/(\d+(?:cm|mm|g))/i)?.[1]
-  const colorWords = text.match(/(rot|blau|grün|gelb|schwarz|weiß|silber|gold|red|blue|green|yellow|black|white|silver|gold|orange|pink|chartreuse)/gi)
+  const colorWords = text.match(/(rot|blau|grün|gelb|schwarz|weiß|silber|gold|red|blue|green|yellow|black|white|silver|gold|orange|pink|chartreuse|firetiger|perch|pike)/gi)
   
   const item: ExtractedItem = {
-    name: nameMatch?.trim() || 'Unbekannter Köder',
-    brand: extractBrand(text),
+    name: productName.trim(),
+    brand: brand,
     size: sizeMatch,
     color: colorWords?.[0],
     confidence: 0.9
@@ -171,6 +238,13 @@ async function processLureImage(text: string): Promise<VisionResult> {
   const modelMatch = text.match(/(?:model|modell|type|typ)[\s:]*([A-Za-z0-9\-]+)/i)
   if (modelMatch) {
     item.model = modelMatch[1]
+  }
+  
+  // Use labels to enhance item type
+  if (labels.includes('spinner') || labels.includes('spinnerbait')) {
+    item.name = `${item.name} (Spinner)`
+  } else if (labels.includes('wobbler') || labels.includes('crankbait')) {
+    item.name = `${item.name} (Wobbler)`
   }
   
   items.push(item)
@@ -188,7 +262,8 @@ function extractBrand(text: string): string | undefined {
     'Rapala', 'Mepps', 'Savage Gear', 'Abu Garcia', 'Shimano', 'Daiwa',
     'Berkley', 'Strike King', 'Storm', 'Blue Fox', 'Panther Martin',
     'Yo-Zuri', 'Lucky Craft', 'Megabass', 'Deps', 'Jackall', 'Balzer',
-    'Spro', 'Fox Rage', 'Westin', 'Illex', 'Gunki', 'Salmo', 'Dam'
+    'Spro', 'Fox Rage', 'Westin', 'Illex', 'Gunki', 'Salmo', 'Dam',
+    'Decathlon', 'Caperlan', 'Penn', 'Okuma', 'Mitchell', 'Quantum'
   ]
   
   const lowerText = text.toLowerCase()
@@ -201,18 +276,16 @@ async function findProductImage(item: ExtractedItem): Promise<string | undefined
     const searchQuery = `${item.brand || ''} ${item.name} ${item.model || ''} fishing lure product image`.trim()
     
     // Search using Brave API
-    const response = await fetch('https://api.search.brave.com/res/v1/images/search', {
-      method: 'GET',
+    const url = new URL('https://api.search.brave.com/res/v1/images/search')
+    url.searchParams.append('q', searchQuery)
+    url.searchParams.append('count', '5')
+    url.searchParams.append('safesearch', 'moderate')
+
+    const response = await fetch(url.toString(), {
       headers: {
         'Accept': 'application/json',
         'X-Subscription-Token': BRAVE_API_KEY
-      },
-      // @ts-ignore - URLSearchParams works in Node.js
-      searchParams: new URLSearchParams({
-        q: searchQuery,
-        count: '5',
-        safesearch: 'moderate',
-      })
+      }
     })
 
     if (!response.ok) {
@@ -226,11 +299,19 @@ async function findProductImage(item: ExtractedItem): Promise<string | undefined
     const results = data.results || []
     for (const result of results) {
       // Prefer images from known fishing retailers or manufacturer sites
-      const trustedDomains = ['rapala.com', 'mepps.com', 'savage-gear.com', 'berkley-fishing.com', 'amazon.com', 'angelplatz.de', 'anglermarkt.de']
-      const url = new URL(result.url || '')
+      const trustedDomains = [
+        'rapala.com', 'mepps.com', 'savage-gear.com', 'berkley-fishing.com',
+        'amazon.com', 'angelplatz.de', 'anglermarkt.de', 'fishingtackle24.de',
+        'decathlon.de', 'askari-sport.com'
+      ]
       
-      if (trustedDomains.some(domain => url.hostname.includes(domain))) {
-        return result.thumbnail?.src || result.url
+      try {
+        const url = new URL(result.url || '')
+        if (trustedDomains.some(domain => url.hostname.includes(domain))) {
+          return result.thumbnail?.src || result.url
+        }
+      } catch (e) {
+        // Invalid URL, skip
       }
     }
     
