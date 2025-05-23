@@ -90,8 +90,8 @@ export function ImageUpload({
 
   const handleCameraCapture = useCallback(() => {
     if (fileInputRef.current) {
-      fileInputRef.current.accept = 'image/*'
-      fileInputRef.current.capture = 'environment'
+      // Reset the input first to ensure change event fires
+      fileInputRef.current.value = ''
       fileInputRef.current.click()
     }
   }, [])
@@ -115,10 +115,12 @@ export function ImageUpload({
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
     >
+      {/* Hidden file input with camera capture support */}
       <input
         ref={fileInputRef}
         type="file"
         accept={accept}
+        capture="environment"
         onChange={handleFileSelect}
         className="hidden"
       />
@@ -168,12 +170,14 @@ export function ImageUpload({
               size="sm"
               variant="outline"
               onClick={handleCameraCapture}
-              className="md:hidden"
             >
               <Camera className="mr-2 h-4 w-4" />
-              Foto
+              Kamera
             </Button>
           </div>
+          <p className="mt-4 text-xs text-muted-foreground">
+            Tipp: Die Kamera funktioniert auf Mobilgeräten und Laptops mit Webcam
+          </p>
         </div>
       )}
 
