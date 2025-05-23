@@ -1,51 +1,92 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222.2 84% 4.9%;
+    /* CatchSmart Design Tokens - Light Mode (Secondary) */
+    --cs-bg: 240 33% 97%; /* #F7F8FB */
+    --cs-surface: 0 0% 100%; /* #FFFFFF */
+    --cs-primary: 198 92% 56%; /* #1EC6FF */
+    --cs-primary-hover: 198 78% 48%; /* #17A6D5 */
+    --cs-secondary: 153 62% 55%; /* #41E39D */
+    --cs-error: 357 100% 68%; /* #FF5A5F */
+    --cs-text: 220 39% 11%; /* #172432 */
+    --cs-text-muted: 210 22% 59%; /* #7A8A9E */
+    
+    /* shadcn/ui compatibility mappings */
+    --background: var(--cs-bg);
+    --foreground: var(--cs-text);
+    
+    --card: var(--cs-surface);
+    --card-foreground: var(--cs-text);
+    
+    --popover: var(--cs-surface);
+    --popover-foreground: var(--cs-text);
+    
+    --primary: var(--cs-primary);
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: var(--cs-secondary);
+    --secondary-foreground: 0 0% 100%;
+    
     --muted: 210 40% 96%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted-foreground: var(--cs-text-muted);
+    
     --accent: 210 40% 96%;
-    --accent-foreground: 222.2 84% 4.9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
-    --radius: 0.5rem;
+    --accent-foreground: var(--cs-text);
+    
+    --destructive: var(--cs-error);
+    --destructive-foreground: 0 0% 100%;
+    
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: var(--cs-primary);
+    
+    --radius: 1rem;
   }
-
+  
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 84% 4.9%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 94.1%;
+    /* CatchSmart Design Tokens - Dark Mode (Primary) */
+    --cs-bg: 210 47% 11%; /* #0F1B2B */
+    --cs-surface: 215 36% 17%; /* #182436 */
+    --cs-primary: 198 100% 56%; /* #1EC6FF */
+    --cs-primary-hover: 198 78% 48%; /* #17A6D5 */
+    --cs-secondary: 153 62% 55%; /* #41E39D */
+    --cs-error: 357 100% 68%; /* #FF5A5F */
+    --cs-text: 205 100% 95%; /* #E5F4FF */
+    --cs-text-muted: 207 29% 66%; /* #9CB5C9 */
+    
+    /* shadcn/ui compatibility mappings */
+    --background: var(--cs-bg);
+    --foreground: var(--cs-text);
+    
+    --card: var(--cs-surface);
+    --card-foreground: var(--cs-text);
+    
+    --popover: var(--cs-surface);
+    --popover-foreground: var(--cs-text);
+    
+    --primary: var(--cs-primary);
+    --primary-foreground: 210 47% 11%;
+    
+    --secondary: var(--cs-secondary);
+    --secondary-foreground: 210 47% 11%;
+    
+    --muted: 217 33% 17%;
+    --muted-foreground: var(--cs-text-muted);
+    
+    --accent: 217 33% 17%;
+    --accent-foreground: var(--cs-text);
+    
+    --destructive: var(--cs-error);
+    --destructive-foreground: 0 0% 100%;
+    
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
+    --ring: var(--cs-primary);
   }
 }
 
@@ -53,7 +94,108 @@
   * {
     @apply border-border;
   }
+  
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  
+  /* Custom font utilities */
+  .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+  
+  /* Touch target minimum sizes for mobile */
+  button, a, [role="button"] {
+    @apply min-h-touch min-w-touch;
+  }
+  
+  /* Smooth scrolling for the entire app */
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* Focus visible styles for accessibility */
+  :focus-visible {
+    @apply outline-none ring-2 ring-cs-primary ring-offset-2 ring-offset-background;
+  }
+  
+  /* Custom scrollbar styles */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    @apply bg-muted;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/30 rounded-full;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/50;
+  }
+}
+
+@layer components {
+  /* Card component styles */
+  .cs-card {
+    @apply rounded-2xl bg-card text-card-foreground shadow-lg/25 p-4;
+  }
+  
+  /* Button variants */
+  .cs-btn-primary {
+    @apply bg-cs-primary text-cs-bg hover:bg-cs-primary-hover 
+           font-medium rounded-lg px-6 py-3 transition-colors
+           active:scale-95 transform duration-100;
+  }
+  
+  .cs-btn-secondary {
+    @apply bg-transparent border border-cs-primary text-cs-primary
+           hover:bg-cs-primary/10 font-medium rounded-lg px-6 py-3 
+           transition-colors active:scale-95 transform duration-100;
+  }
+  
+  /* Mobile-first navigation */
+  .cs-bottom-nav {
+    @apply fixed bottom-0 left-0 right-0 bg-cs-surface 
+           border-t border-border px-4 py-2 z-50;
+  }
+  
+  /* Loading states */
+  .cs-skeleton {
+    @apply animate-pulse bg-muted rounded;
+  }
+}
+
+@layer utilities {
+  /* Text gradients for hero sections */
+  .text-gradient {
+    @apply bg-gradient-to-r from-cs-primary to-cs-secondary 
+           bg-clip-text text-transparent;
+  }
+  
+  /* Glassmorphism effect */
+  .glass {
+    @apply backdrop-blur-md bg-background/80 border border-border/50;
+  }
+  
+  /* Safe area padding for mobile */
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .safe-left {
+    padding-left: env(safe-area-inset-left);
+  }
+  
+  .safe-right {
+    padding-right: env(safe-area-inset-right);
   }
 }
