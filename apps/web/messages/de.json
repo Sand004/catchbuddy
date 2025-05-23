@@ -12,6 +12,168 @@
     "save": "Speichern",
     "cancel": "Abbrechen",
     "delete": "Löschen",
-    "edit": "Bearbeiten"
+    "edit": "Bearbeiten",
+    "add": "Hinzufügen",
+    "search": "Suchen",
+    "filter": "Filtern",
+    "sort": "Sortieren",
+    "close": "Schließen",
+    "back": "Zurück",
+    "next": "Weiter",
+    "previous": "Zurück",
+    "yes": "Ja",
+    "no": "Nein",
+    "confirm": "Bestätigen",
+    "selectLanguage": "Sprache wählen"
+  },
+  "home": {
+    "hero": {
+      "title": "Fange mehr mit <gradient>KI-Power</gradient>",
+      "subtitle": "CatchSmart analysiert Wetter, Standort und deine Ausrüstung, um dir die perfekten Köder zu empfehlen. Wie ein erfahrener Angel-Guide in deiner Tasche.",
+      "cta": {
+        "primary": "Kostenlos starten",
+        "secondary": "Demo ansehen"
+      }
+    },
+    "features": {
+      "title": "Alles was du zum Angeln brauchst",
+      "subtitle": "Von der Köder-Verwaltung bis zur KI-Empfehlung",
+      "scanner": {
+        "title": "Köder-Scanner",
+        "description": "Fotografiere deine Köder und lass sie automatisch erkennen und kategorisieren"
+      },
+      "ai": {
+        "title": "KI-Empfehlungen",
+        "description": "Erhalte personalisierte Köderempfehlungen basierend auf Wetter, Ort und Zielfisch"
+      },
+      "stats": {
+        "title": "Fang-Statistiken",
+        "description": "Verfolge deine Erfolge und lerne aus vergangenen Fängen für bessere Ergebnisse"
+      }
+    },
+    "pricing": {
+      "title": "Einfache Preise",
+      "subtitle": "Starte kostenlos und upgrade wenn du mehr brauchst",
+      "free": {
+        "name": "Hobby-Angler",
+        "price": "0€",
+        "period": "/Monat",
+        "features": [
+          "10 Köder verwalten",
+          "2 KI-Empfehlungen/Tag",
+          "Basis-Statistiken"
+        ]
+      },
+      "pro": {
+        "name": "Profi-Angler",
+        "price": "4,99€",
+        "period": "/Monat",
+        "badge": "BELIEBT",
+        "features": [
+          "100 Köder verwalten",
+          "20 KI-Empfehlungen/Tag",
+          "Erweiterte Statistiken"
+        ]
+      },
+      "premium": {
+        "name": "Angel-Meister",
+        "price": "9,99€",
+        "period": "/Monat",
+        "features": [
+          "Unbegrenzte Köder",
+          "Unbegrenzte KI-Empfehlungen",
+          "Premium Support & Features"
+        ]
+      }
+    },
+    "cta": {
+      "title": "Bereit für mehr Fangerfolg?",
+      "subtitle": "Schließe dich tausenden Anglern an, die bereits mit CatchSmart erfolgreicher fischen.",
+      "button": "Jetzt kostenlos starten",
+      "disclaimer": "Keine Kreditkarte erforderlich • 10 Köder kostenlos"
+    }
+  },
+  "equipment": {
+    "title": "Meine Ausrüstung",
+    "empty": {
+      "title": "Noch keine Ausrüstung",
+      "description": "Füge deinen ersten Köder hinzu, um personalisierte Empfehlungen zu erhalten.",
+      "cta": "Ersten Köder hinzufügen"
+    },
+    "add": {
+      "title": "Köder hinzufügen",
+      "scan": "Köder scannen",
+      "manual": "Manuell eingeben"
+    },
+    "types": {
+      "lure": "Köder",
+      "rod": "Rute",
+      "reel": "Rolle",
+      "line": "Schnur",
+      "bait": "Naturköder",
+      "tackle": "Zubehör",
+      "other": "Sonstiges"
+    },
+    "fields": {
+      "name": "Bezeichnung",
+      "type": "Typ",
+      "brand": "Marke",
+      "model": "Modell",
+      "color": "Farbe",
+      "size": "Größe",
+      "weight": "Gewicht",
+      "notes": "Notizen",
+      "favorite": "Favorit"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Willkommen zurück",
+      "subtitle": "Melde dich an, um fortzufahren",
+      "email": "E-Mail",
+      "password": "Passwort",
+      "rememberMe": "Angemeldet bleiben",
+      "forgotPassword": "Passwort vergessen?",
+      "submit": "Anmelden",
+      "noAccount": "Noch kein Konto?",
+      "signUp": "Jetzt registrieren"
+    },
+    "register": {
+      "title": "Konto erstellen",
+      "subtitle": "Starte kostenlos mit CatchSmart",
+      "name": "Name",
+      "email": "E-Mail",
+      "password": "Passwort",
+      "confirmPassword": "Passwort bestätigen",
+      "terms": "Ich akzeptiere die <link>AGB</link> und <link>Datenschutzbestimmungen</link>",
+      "submit": "Registrieren",
+      "hasAccount": "Bereits registriert?",
+      "signIn": "Jetzt anmelden"
+    },
+    "reset": {
+      "title": "Passwort zurücksetzen",
+      "subtitle": "Wir senden dir einen Link zum Zurücksetzen",
+      "email": "E-Mail",
+      "submit": "Link senden",
+      "backToLogin": "Zurück zur Anmeldung",
+      "success": "Prüfe deine E-Mails für den Reset-Link"
+    }
+  },
+  "errors": {
+    "general": "Ein Fehler ist aufgetreten",
+    "network": "Keine Internetverbindung",
+    "auth": {
+      "invalidCredentials": "Ungültige Anmeldedaten",
+      "emailInUse": "E-Mail wird bereits verwendet",
+      "weakPassword": "Passwort zu schwach",
+      "userNotFound": "Benutzer nicht gefunden"
+    },
+    "validation": {
+      "required": "Dieses Feld ist erforderlich",
+      "email": "Ungültige E-Mail-Adresse",
+      "minLength": "Mindestens {min} Zeichen erforderlich",
+      "maxLength": "Maximal {max} Zeichen erlaubt",
+      "passwordMatch": "Passwörter stimmen nicht überein"
+    }
   }
 }
