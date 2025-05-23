@@ -150,10 +150,10 @@ affiliate_clicks (
 - [ ] MAN-010: Datenschutz & AGB von Anwalt prüfen lassen
 
 #### AI-AGENT TASKS
-- [ ] AI-007: Equipment Management UI (CRUD)
+- [x] AI-007: Equipment Management UI (CRUD) – COMPLETE ✅
 - [ ] AI-008: Image Upload & Google Vision Integration
 - [ ] AI-009: Receipt Parser für automatisches Equipment-Import
-- [ ] AI-010: Equipment-Galerie mit Filter & Suche
+- [x] AI-010: Equipment-Galerie mit Filter & Suche – COMPLETE ✅
 - [ ] AI-011: Offline-Sync Logic mit Conflict Resolution
 - [ ] AI-012: Equipment Embedding Generation Pipeline
 
@@ -526,3 +526,17 @@ Dieser Plan ist als "Living Document" konzipiert und wird kontinuierlich von AI-
 
 ## Dependencies Added:
 - @supabase/ssr (for server-side auth)
+
+// NOTE: Equipment Management now includes:
+// - Full CRUD (create, read, update, delete, favorite)
+// - Search (name, brand, model, tags)
+// - Filter by type
+// - Statistics overview
+// - Zod form validation
+// - Internationalization (i18n)
+// - Supabase real-time sync
+// - Row Level Security (RLS)
+// - Automatic timestamps
+// - User association
+//
+// All features tested and documented as per masterplan requirements.
