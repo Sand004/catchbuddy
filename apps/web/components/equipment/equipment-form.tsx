@@ -1,346 +1,261 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
+import { Save, X } from 'lucide-react'
 import { Button } from '@catchsmart/ui/src/components/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@catchsmart/ui/src/components/card'
-import { equipmentFormSchema, type EquipmentFormData } from '@catchsmart/shared/src/validations/equipment'
-import { EQUIPMENT_TYPES } from '@catchsmart/shared/src/constants'
-import { useEquipmentStore } from '@/lib/stores/equipment-store'
+import type { Database } from '@catchsmart/database/types/database'
+
+type Equipment = Database['public']['Tables']['equipment_items']['Row']
+type EquipmentInsert = Database['public']['Tables']['equipment_items']['Insert']
 
 interface EquipmentFormProps {
-  onSuccess?: () => void
-  onCancel?: () => void
-  initialData?: Partial<EquipmentFormData>
-  editMode?: boolean
-  equipmentId?: string
+  initialData?: Partial<Equipment> | null
+  onSave: (data: EquipmentInsert) => Promise<void>
+  onCancel: () => void
 }
 
-export function EquipmentForm({ 
-  onSuccess, 
-  onCancel, 
-  initialData,
-  editMode = false,
-  equipmentId
-}: EquipmentFormProps) {
+export function EquipmentForm({ initialData, onSave, onCancel }: EquipmentFormProps) {
   const t = useTranslations()
-  const { addEquipment, updateEquipment } = useEquipmentStore()
-  
-  const [formData, setFormData] = useState<EquipmentFormData>({
-    name: initialData?.name || '',
-    type: initialData?.type || 'lure',
-    brand: initialData?.brand || '',
-    model: initialData?.model || '',
-    color: initialData?.color || '',
-    size: initialData?.size || '',
-    weight: initialData?.weight || null,
-    notes: initialData?.notes || '',
-    attributes: initialData?.attributes || {},
-    tags: initialData?.tags || [],
-    isFavorite: initialData?.isFavorite || false,
-    condition: initialData?.condition || 'good',
+  const [isLoading, setIsLoading] = useState(false)
+  const [formData, setFormData] = useState<Partial<EquipmentInsert>>({
+    name: '',
+    type: 'lure',
+    brand: '',
+    model: '',
+    color: '',
+    size: '',
+    weight: undefined,
+    notes: '',
+    condition: 'new',
+    is_favorite: false,
+    ...initialData
   })
-  
-  const [errors, setErrors] = useState<Record<string, string>>({})
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [tagInput, setTagInput] = useState('')
+
+  const equipmentTypes = [
+    { value: 'lure', label: t('equipment.types.lure') },
+    { value: 'rod', label: t('equipment.types.rod') },
+    { value: 'reel', label: t('equipment.types.reel') },
+    { value: 'line', label: t('equipment.types.line') },
+    { value: 'bait', label: t('equipment.types.bait') },
+    { value: 'tackle', label: t('equipment.types.tackle') },
+    { value: 'other', label: t('equipment.types.other') },
+  ]
+
+  const conditions = [
+    { value: 'new', label: 'Neu' },
+    { value: 'good', label: 'Gut' },
+    { value: 'fair', label: 'Gebraucht' },
+    { value: 'poor', label: 'Schlecht' },
+  ]
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setErrors({})
-    setIsSubmitting(true)
+    setIsLoading(true)
 
     try {
-      // Validate form data
-      const validatedData = equipmentFormSchema.parse(formData)
-      
-      if (editMode && equipmentId) {
-        await updateEquipment(equipmentId, validatedData)
-      } else {
-        await addEquipment(validatedData)
-      }
-      
-      onSuccess?.()
-    } catch (error: any) {
-      if (error.errors) {
-        // Zod validation errors
-        const fieldErrors: Record<string, string> = {}
-        error.errors.forEach((err: any) => {
-          if (err.path[0]) {
-            fieldErrors[err.path[0]] = err.message
-          }
-        })
-        setErrors(fieldErrors)
-      } else {
-        // Other errors
-        setErrors({ general: error.message })
-      }
+      await onSave(formData as EquipmentInsert)
+    } catch (error) {
+      console.error('Save failed:', error)
     } finally {
-      setIsSubmitting(false)
+      setIsLoading(false)
     }
   }
 
-  const addTag = () => {
-    if (tagInput.trim() && !formData.tags.includes(tagInput.trim())) {
-      setFormData({
-        ...formData,
-        tags: [...formData.tags, tagInput.trim().toLowerCase()]
-      })
-      setTagInput('')
-    }
-  }
-
-  const removeTag = (tag: string) => {
-    setFormData({
-      ...formData,
-      tags: formData.tags.filter(t => t !== tag)
-    })
+  const updateField = (field: keyof EquipmentInsert, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }))
   }
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>
-          {editMode ? 'Ausrüstung bearbeiten' : t('equipment.add.title')}
+          {initialData ? 'Equipment bearbeiten' : 'Neues Equipment'}
         </CardTitle>
         <CardDescription>
-          {editMode ? 'Bearbeite die Details deiner Ausrüstung' : 'Füge neue Ausrüstung zu deiner Sammlung hinzu'}
+          Fülle die Details für dein Angelzubehör aus
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
-          {errors.general && (
-            <div className="rounded-lg bg-cs-error/10 p-3 text-sm text-cs-error">
-              {errors.general}
-            </div>
-          )}
+          {/* Name */}
+          <div>
+            <label htmlFor="name" className="block text-sm font-medium mb-2">
+              {t('equipment.fields.name')} *
+            </label>
+            <input
+              id="name"
+              type="text"
+              value={formData.name || ''}
+              onChange={(e) => updateField('name', e.target.value)}
+              required
+              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cs-primary focus-visible:ring-offset-2"
+              placeholder="z.B. Rapala Original Floater"
+            />
+          </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <label htmlFor="name" className="text-sm font-medium">
-                {t('equipment.fields.name')} *
-              </label>
-              <input
-                id="name"
-                type="text"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
-                placeholder="z.B. Rapala Original Floater"
-                disabled={isSubmitting}
-              />
-              {errors.name && <p className="text-xs text-cs-error">{errors.name}</p>}
-            </div>
+          {/* Type */}
+          <div>
+            <label htmlFor="type" className="block text-sm font-medium mb-2">
+              {t('equipment.fields.type')} *
+            </label>
+            <select
+              id="type"
+              value={formData.type || 'lure'}
+              onChange={(e) => updateField('type', e.target.value)}
+              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cs-primary focus-visible:ring-offset-2"
+            >
+              {equipmentTypes.map(type => (
+                <option key={type.value} value={type.value}>
+                  {type.label}
+                </option>
+              ))}
+            </select>
+          </div>
 
-            <div className="space-y-2">
-              <label htmlFor="type" className="text-sm font-medium">
-                {t('equipment.fields.type')} *
-              </label>
-              <select
-                id="type"
-                value={formData.type}
-                onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
-                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
-                disabled={isSubmitting}
-              >
-                {EQUIPMENT_TYPES.map(type => (
-                  <option key={type} value={type}>
-                    {t(`equipment.types.${type}`)}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="space-y-2">
-              <label htmlFor="brand" className="text-sm font-medium">
+          {/* Brand & Model */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="brand" className="block text-sm font-medium mb-2">
                 {t('equipment.fields.brand')}
               </label>
               <input
                 id="brand"
                 type="text"
                 value={formData.brand || ''}
-                onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
-                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                onChange={(e) => updateField('brand', e.target.value)}
+                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cs-primary focus-visible:ring-offset-2"
                 placeholder="z.B. Rapala"
-                disabled={isSubmitting}
               />
             </div>
-
-            <div className="space-y-2">
-              <label htmlFor="model" className="text-sm font-medium">
+            <div>
+              <label htmlFor="model" className="block text-sm font-medium mb-2">
                 {t('equipment.fields.model')}
               </label>
               <input
                 id="model"
                 type="text"
                 value={formData.model || ''}
-                onChange={(e) => setFormData({ ...formData, model: e.target.value })}
-                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
-                placeholder="z.B. Original Floater F11"
-                disabled={isSubmitting}
+                onChange={(e) => updateField('model', e.target.value)}
+                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cs-primary focus-visible:ring-offset-2"
+                placeholder="z.B. F11"
               />
             </div>
+          </div>
 
-            <div className="space-y-2">
-              <label htmlFor="color" className="text-sm font-medium">
+          {/* Color & Size */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="color" className="block text-sm font-medium mb-2">
                 {t('equipment.fields.color')}
               </label>
               <input
                 id="color"
                 type="text"
                 value={formData.color || ''}
-                onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                onChange={(e) => updateField('color', e.target.value)}
+                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cs-primary focus-visible:ring-offset-2"
                 placeholder="z.B. Silber"
-                disabled={isSubmitting}
               />
             </div>
-
-            <div className="space-y-2">
-              <label htmlFor="size" className="text-sm font-medium">
+            <div>
+              <label htmlFor="size" className="block text-sm font-medium mb-2">
                 {t('equipment.fields.size')}
               </label>
               <input
                 id="size"
                 type="text"
                 value={formData.size || ''}
-                onChange={(e) => setFormData({ ...formData, size: e.target.value })}
-                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                onChange={(e) => updateField('size', e.target.value)}
+                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cs-primary focus-visible:ring-offset-2"
                 placeholder="z.B. 11cm"
-                disabled={isSubmitting}
               />
-            </div>
-
-            <div className="space-y-2">
-              <label htmlFor="weight" className="text-sm font-medium">
-                {t('equipment.fields.weight')} (g)
-              </label>
-              <input
-                id="weight"
-                type="number"
-                value={formData.weight || ''}
-                onChange={(e) => setFormData({ 
-                  ...formData, 
-                  weight: e.target.value ? parseFloat(e.target.value) : null 
-                })}
-                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
-                placeholder="z.B. 12"
-                disabled={isSubmitting}
-                step="0.1"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label htmlFor="condition" className="text-sm font-medium">
-                Zustand
-              </label>
-              <select
-                id="condition"
-                value={formData.condition}
-                onChange={(e) => setFormData({ ...formData, condition: e.target.value as any })}
-                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
-                disabled={isSubmitting}
-              >
-                <option value="new">Neu</option>
-                <option value="good">Gut</option>
-                <option value="fair">Befriedigend</option>
-                <option value="poor">Schlecht</option>
-              </select>
             </div>
           </div>
 
-          <div className="space-y-2">
-            <label htmlFor="tags" className="text-sm font-medium">
-              Tags
+          {/* Weight */}
+          <div>
+            <label htmlFor="weight" className="block text-sm font-medium mb-2">
+              {t('equipment.fields.weight')} (g)
             </label>
-            <div className="flex gap-2">
-              <input
-                id="tags"
-                type="text"
-                value={tagInput}
-                onChange={(e) => setTagInput(e.target.value)}
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault()
-                    addTag()
-                  }
-                }}
-                className="flex-1 rounded-lg border border-input bg-background px-3 py-2 text-sm"
-                placeholder="Tag hinzufügen und Enter drücken"
-                disabled={isSubmitting}
-              />
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={addTag}
-                disabled={isSubmitting}
-              >
-                Hinzufügen
-              </Button>
-            </div>
-            {formData.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-2">
-                {formData.tags.map(tag => (
-                  <span
-                    key={tag}
-                    className="inline-flex items-center gap-1 rounded-full bg-cs-primary/10 px-3 py-1 text-xs"
-                  >
-                    {tag}
-                    <button
-                      type="button"
-                      onClick={() => removeTag(tag)}
-                      className="text-cs-primary hover:text-cs-primary-hover"
-                    >
-                      ×
-                    </button>
-                  </span>
-                ))}
-              </div>
-            )}
+            <input
+              id="weight"
+              type="number"
+              step="0.1"
+              value={formData.weight || ''}
+              onChange={(e) => updateField('weight', e.target.value ? parseFloat(e.target.value) : null)}
+              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cs-primary focus-visible:ring-offset-2"
+              placeholder="z.B. 6.5"
+            />
           </div>
 
-          <div className="space-y-2">
-            <label htmlFor="notes" className="text-sm font-medium">
+          {/* Condition */}
+          <div>
+            <label htmlFor="condition" className="block text-sm font-medium mb-2">
+              Zustand
+            </label>
+            <select
+              id="condition"
+              value={formData.condition || 'new'}
+              onChange={(e) => updateField('condition', e.target.value)}
+              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cs-primary focus-visible:ring-offset-2"
+            >
+              {conditions.map(condition => (
+                <option key={condition.value} value={condition.value}>
+                  {condition.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Notes */}
+          <div>
+            <label htmlFor="notes" className="block text-sm font-medium mb-2">
               {t('equipment.fields.notes')}
             </label>
             <textarea
               id="notes"
               value={formData.notes || ''}
-              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm min-h-[100px]"
+              onChange={(e) => updateField('notes', e.target.value)}
+              rows={3}
+              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cs-primary focus-visible:ring-offset-2"
               placeholder="Zusätzliche Notizen..."
-              disabled={isSubmitting}
             />
           </div>
 
-          <div className="flex items-center gap-2">
+          {/* Favorite */}
+          <div className="flex items-center">
             <input
               id="favorite"
               type="checkbox"
-              checked={formData.isFavorite}
-              onChange={(e) => setFormData({ ...formData, isFavorite: e.target.checked })}
-              className="h-4 w-4 rounded border-input text-cs-primary"
-              disabled={isSubmitting}
+              checked={formData.is_favorite || false}
+              onChange={(e) => updateField('is_favorite', e.target.checked)}
+              className="h-4 w-4 rounded border-input text-cs-primary focus:ring-cs-primary"
             />
-            <label htmlFor="favorite" className="text-sm font-medium">
-              Als Favorit markieren
+            <label htmlFor="favorite" className="ml-2 text-sm">
+              Als {t('equipment.fields.favorite')} markieren
             </label>
           </div>
 
-          <div className="flex gap-3 pt-4">
+          {/* Actions */}
+          <div className="flex gap-4 pt-4">
             <Button
               type="submit"
-              loading={isSubmitting}
-              disabled={isSubmitting}
+              disabled={isLoading || !formData.name}
+              loading={isLoading}
+              className="flex-1"
             >
-              {editMode ? 'Speichern' : 'Hinzufügen'}
+              <Save className="mr-2 h-4 w-4" />
+              {t('common.save')}
             </Button>
             <Button
               type="button"
               variant="outline"
               onClick={onCancel}
-              disabled={isSubmitting}
+              disabled={isLoading}
             >
+              <X className="mr-2 h-4 w-4" />
               {t('common.cancel')}
             </Button>
           </div>
