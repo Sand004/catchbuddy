@@ -1,0 +1,20 @@
+{
+  "name": "@catchsmart/database",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "migrate": "supabase db push",
+    "seed": "node scripts/seed.js",
+    "reset": "supabase db reset",
+    "generate-types": "supabase gen types typescript --local > types/database.ts",
+    "start": "supabase start",
+    "stop": "supabase stop"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.42.0"
+  },
+  "devDependencies": {
+    "supabase": "^1.165.1",
+    "dotenv": "^16.4.5"
+  }
+}
