@@ -38,4 +38,9 @@
 - **CI/CD**: GitHub Actions
 - **Payments**: RevenueCat (iOS/Android) + Stripe (Web)
 
+### Neue Tasks Phase 1 (2025)
+- AI-029: Tailwind-Tokens in packages/ui/tailwind.config.ts definieren
+- AI-030: Figma Brand-Sheet (Farben, Text Styles, Komponenten)
+- AI-031: Storybook mit Button, Card, Chart Showcase
+
 *Vollständiger Master-Plan siehe: [Original Dokument](../catchsmart-masterplan.md)*

@@ -117,20 +117,23 @@ affiliate_clicks (
 ### Phase 1: Foundation (Woche 1-2)
 
 #### MANUELLE TASKS (You)
-- [ ] MAN-001: Supabase Projekt erstellen & konfigurieren
-- [ ] MAN-002: GitHub Repo aufsetzen mit Monorepo-Struktur
-- [ ] MAN-003: Vercel Account & Deployment Pipeline
-- [ ] MAN-004: Google Cloud Vision API aktivieren & Keys
-- [ ] MAN-005: RevenueCat Account & Produkte anlegen
-- [ ] MAN-006: Domain registrieren & DNS Setup
+- [x] MAN-001: Supabase Projekt erstellen & konfigurieren
+- [x] MAN-002: GitHub Repo aufsetzen mit Monorepo-Struktur
+- [x] MAN-003: Vercel Account & Deployment Pipeline
+- [x] MAN-004: Google Cloud Vision API aktivieren & Keys
+- [x] MAN-005: RevenueCat Account & Produkte anlegen
+- [X] MAN-006: Domain registrieren & DNS Setup
 
 #### AI-AGENT TASKS
-- [ ] AI-001: Next.js PWA Boilerplate mit TypeScript generieren
+- [x] AI-001: Next.js PWA Boilerplate mit TypeScript generieren
 - [ ] AI-002: Supabase Schema & Migrations erstellen
 - [ ] AI-003: Tailwind + shadcn/ui Setup & Theme
 - [ ] AI-004: Service Worker für Offline-Funktionalität
 - [ ] AI-005: i18n Setup mit next-intl (DE, ES, EN)
 - [ ] AI-006: Basic Auth Flow (Login/Register/Reset)
+- [ ] AI-029: Tailwind-Tokens in packages/ui/tailwind.config.ts definieren
+- [ ] AI-030: Figma Brand-Sheet (Farben, Text Styles, Komponenten)
+- [ ] AI-031: Storybook mit Button, Card, Chart Showcase
 
 ### Phase 2: Core Features (Woche 3-4)
 
@@ -423,5 +426,94 @@ pnpm embeddings    # Generate embeddings
 - Account-Löschung in App
 
 ---
+
+🎨 Brand Identity & Design System
+
+Diese Sektion definiert Farben, Typografie und UI‑Komponenten‑Standards. Alle Werte werden als Tailwind‑Design‑Tokens hinterlegt und in Figma dokumentiert, sodass spätere Features ohne Design‑Drift integriert werden können.
+
+Farbpalette (Dark Theme – WCAG AA)
+
+Token
+
+HEX
+
+Verwendung
+
+--color-bg
+
+#0F1B2B
+
+Haupt‑Hintergrund
+
+--color-surface
+
+#182436
+
+Karten & Modals
+
+--color-primary
+
+#1EC6FF
+
+Buttons, Links, aktive Icons
+
+--color-primary-hover
+
+#17A6D5
+
+Hover/Pressed State
+
+--color-secondary
+
+#41E39D
+
+Success, positive Graphen
+
+--color-error
+
+#FF5A5F
+
+Fehlermeldungen
+
+--color-text
+
+#E5F4FF
+
+Fließtext
+
+--color-text-muted
+
+#9CB5C9
+
+Sekundärer Text
+
+Light Theme (optional): identische Hues, jedoch L
+a = 92 % für Background, Text = #172432.
+
+Typografie
+
+Inter (Google Font) – Headlines 700, Body 400.
+
+JetBrains Mono – Zahlen, Code‑Blöcke.
+
+Basisgröße 16 px; H1 → 2.25 rem, H2 → 1.75 rem.
+
+UI‑Komponente Standards
+
+Cards: rounded-2xl, shadow-lg/25, Padding p-4.
+
+Buttons: Primär → bg-primary text-bg; Sekundär → transparent, border-primary.
+
+Charts (Recharts): Linienfarbe color-primary, Tooltip bg color-surface.
+
+Icons: Lucide 24 px, Stroke 1.75 px, Farbe currentColor.
+
+Brand Voice
+
+Kompetent & ruhig – kein Clickbait.
+
+Hilfsbereit – klare Tooltips, Micro‑Copy.
+
+Naturverbunden – subtile Wasser‑/Grün‑Akzente; keine Neon‑Reizüberflutung.
 
 Dieser Plan ist als "Living Document" konzipiert und wird kontinuierlich von AI-Agenten und dem Team erweitert. Alle Tasks sind so strukturiert, dass sie unabhängig bearbeitet werden können.
