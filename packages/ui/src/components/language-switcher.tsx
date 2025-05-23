@@ -1,8 +1,5 @@
 'use client'
 
-import { useLocale, useTranslations } from 'next-intl'
-import { usePathname, useRouter } from 'next/navigation'
-import { locales, type Locale } from '@/i18n'
 import { Button } from './button'
 import {
   DropdownMenu,
@@ -11,6 +8,8 @@ import {
   DropdownMenuTrigger,
 } from './dropdown-menu'
 import { Globe } from 'lucide-react'
+
+export type Locale = 'de' | 'en' | 'es'
 
 const languageNames: Record<Locale, string> = {
   de: 'Deutsch',
@@ -24,35 +23,33 @@ const languageFlags: Record<Locale, string> = {
   es: '🇪🇸',
 }
 
-export function LanguageSwitcher() {
-  const t = useTranslations('common')
-  const locale = useLocale() as Locale
-  const router = useRouter()
-  const pathname = usePathname()
+interface LanguageSwitcherProps {
+  currentLocale: Locale
+  locales: readonly Locale[]
+  onLocaleChange: (locale: Locale) => void
+  label?: string
+}
 
-  const handleLanguageChange = (newLocale: Locale) => {
-    // Get the current path without the locale
-    const segments = pathname.split('/')
-    segments[1] = newLocale
-    const newPath = segments.join('/')
-    
-    router.push(newPath)
-  }
-
+export function LanguageSwitcher({
+  currentLocale,
+  locales,
+  onLocaleChange,
+  label = 'Select Language'
+}: LanguageSwitcherProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" className="h-9 w-9">
           <Globe className="h-4 w-4" />
-          <span className="sr-only">{t('selectLanguage')}</span>
+          <span className="sr-only">{label}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         {locales.map((lang) => (
           <DropdownMenuItem
             key={lang}
-            onClick={() => handleLanguageChange(lang)}
-            className={locale === lang ? 'bg-accent' : ''}
+            onClick={() => onLocaleChange(lang)}
+            className={currentLocale === lang ? 'bg-accent' : ''}
           >
             <span className="mr-2 text-lg">{languageFlags[lang]}</span>
             <span>{languageNames[lang]}</span>
