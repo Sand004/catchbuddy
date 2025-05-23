@@ -13,13 +13,38 @@ const intlMiddleware = createIntlMiddleware({
 })
 
 export async function middleware(request: NextRequest) {
-  // First handle i18n
-  const intlResponse = intlMiddleware(request)
+  // For API routes, handle auth without i18n
+  if (request.nextUrl.pathname.startsWith('/api')) {
+    const response = NextResponse.next()
+    
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll()
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value, options }) => {
+              response.cookies.set(name, value, options)
+            })
+          },
+        },
+      }
+    )
+
+    // This will refresh the session if it exists
+    await supabase.auth.getUser()
+
+    return response
+  }
   
-  // Create a response object
+  // For non-API routes, handle i18n
+  const intlResponse = intlMiddleware(request)
   const response = intlResponse || NextResponse.next()
   
-  // Create Supabase client
+  // Also handle auth for non-API routes
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -38,20 +63,20 @@ export async function middleware(request: NextRequest) {
   )
 
   // Refresh session if it exists
-  // This is important for server-side components to have access to the session
-  const { data: { user }, error } = await supabase.auth.getUser()
+  await supabase.auth.getUser()
 
   return response
 }
 
 export const config = {
-  // Match all pathnames except for
-  // - … if they start with `/api`, `/_next` or `/_vercel`
-  // - … the ones containing a dot (e.g. `favicon.ico`)
   matcher: [
-    // Match all pathnames without a dot
-    '/((?!api|_next|_vercel|.*\\..*).*)',
-    // Specifically include the root
-    '/'
-  ]
+    /*
+     * Match all request paths except:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - public folder
+     */
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
 }
