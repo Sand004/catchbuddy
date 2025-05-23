@@ -26,42 +26,56 @@ interface ExtractedItem {
 }
 
 export async function POST(request: NextRequest) {
-  console.log('Vision API called')
+  console.log('=== Vision API called ===')
+  console.log('Headers:', Object.fromEntries(request.headers.entries()))
   
   try {
     // Create Supabase client with proper cookie handling
     const cookieStore = await cookies()
+    
+    // Debug: Log all cookies
+    const allCookies = cookieStore.getAll()
+    console.log('Available cookies:', allCookies.map(c => ({ name: c.name, hasValue: !!c.value })))
+    
     const supabase = createServerClient<Database>(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
         cookies: {
           getAll() {
-            return cookieStore.getAll()
+            return allCookies
           },
           setAll(cookiesToSet) {
             try {
               cookiesToSet.forEach(({ name, value, options }) =>
                 cookieStore.set(name, value, options)
               )
-            } catch {
+            } catch (error) {
               // The `setAll` method was called from a Server Component.
               // This can be ignored if you have middleware refreshing
               // user sessions.
+              console.log('Cookie set error (can be ignored):', error)
             }
           },
         },
       }
     )
     
-    // Check authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    // Check authentication - use getSession instead of getUser for better server-side handling
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
     
-    console.log('Auth check:', { userId: user?.id, error: authError?.message })
+    console.log('Session check:', { 
+      hasSession: !!session, 
+      userId: session?.user?.id,
+      error: sessionError?.message 
+    })
     
-    if (authError || !user) {
-      console.error('Auth failed:', authError)
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    if (sessionError || !session) {
+      console.error('Auth failed:', sessionError || 'No session found')
+      return NextResponse.json(
+        { error: 'Unauthorized - Please log in again' }, 
+        { status: 401 }
+      )
     }
 
     // Get file from request
@@ -72,7 +86,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 })
     }
 
-    console.log('Processing file:', file.name, 'Size:', file.size)
+    console.log('Processing file:', file.name, 'Size:', file.size, 'Type:', file.type)
 
     // Convert file to base64 for Google Vision API
     const bytes = await file.arrayBuffer()
@@ -80,45 +94,63 @@ export async function POST(request: NextRequest) {
     const base64Image = buffer.toString('base64')
 
     // Upload to Supabase Storage
-    const fileName = `${user.id}/${Date.now()}-${file.name}`
+    const fileName = `${session.user.id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
+    console.log('Uploading to storage:', fileName)
+    
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('equipment-images')
       .upload(fileName, buffer, {
         contentType: file.type,
         cacheControl: '3600',
+        upsert: false
       })
 
     if (uploadError) {
       console.error('Storage upload error:', uploadError)
+      // Check if bucket exists
+      if (uploadError.message.includes('bucket')) {
+        return NextResponse.json(
+          { error: 'Storage bucket "equipment-images" not found. Please create it in Supabase.' },
+          { status: 500 }
+        )
+      }
       throw new Error(`Upload failed: ${uploadError.message}`)
     }
 
-    console.log('File uploaded successfully:', fileName)
+    console.log('File uploaded successfully:', uploadData.path)
 
     // Get public URL
     const { data: { publicUrl } } = supabase.storage
       .from('equipment-images')
-      .getPublicUrl(fileName)
+      .getPublicUrl(uploadData.path)
+
+    console.log('Public URL:', publicUrl)
 
     // Process with Google Vision REST API
     let visionResult: VisionResult
 
-    if (GOOGLE_API_KEY) {
+    if (GOOGLE_API_KEY && GOOGLE_API_KEY !== 'your-google-cloud-api-key') {
       console.log('Processing with Google Vision API...')
       visionResult = await processWithGoogleVision(base64Image)
     } else {
       console.warn('Google Vision API key not configured, using mock data')
+      console.log('Set GOOGLE_CLOUD_API_KEY in your .env.local file')
       visionResult = await processWithMockData(base64Image)
     }
 
     console.log('Vision processing complete:', visionResult)
 
     // Use Brave Search to find product images for extracted items
-    if (BRAVE_API_KEY && visionResult.items.length > 0) {
+    if (BRAVE_API_KEY && BRAVE_API_KEY !== 'your-brave-api-key' && visionResult.items.length > 0) {
       console.log('Searching for product images...')
       for (const item of visionResult.items) {
         if (!item.imageUrl && item.name) {
-          item.imageUrl = await findProductImage(item)
+          try {
+            item.imageUrl = await findProductImage(item)
+          } catch (error) {
+            console.error('Image search failed for item:', item.name, error)
+            // Continue without image
+          }
         }
       }
     }
@@ -129,7 +161,7 @@ export async function POST(request: NextRequest) {
       vision: visionResult,
     }
 
-    console.log('Sending response:', response)
+    console.log('Sending successful response')
 
     return NextResponse.json(response)
 
@@ -213,8 +245,35 @@ async function processWithGoogleVision(base64Image: string): Promise<VisionResul
 async function processWithMockData(base64Image: string): Promise<VisionResult> {
   // Mock implementation for development
   console.log('Using mock data for testing')
-  const mockText = "Rapala Original Floater F11 Silver 11cm"
-  return processLureImage(mockText, ['fishing lure', 'wobbler'], ['Rapala'])
+  
+  // Simulate some delay
+  await new Promise(resolve => setTimeout(resolve, 1000))
+  
+  const mockItems = [
+    {
+      name: 'Rapala Original Floater F11',
+      brand: 'Rapala',
+      model: 'Original Floater',
+      color: 'Silver',
+      size: '11cm',
+      confidence: 0.9
+    },
+    {
+      name: 'Mepps Aglia Nr. 3',
+      brand: 'Mepps',
+      model: 'Aglia',
+      color: 'Kupfer',
+      size: 'Nr. 3',
+      confidence: 0.85
+    }
+  ]
+  
+  // Return single item for lure photo
+  return {
+    type: 'lure',
+    items: [mockItems[0]],
+    rawText: 'Mock detection: Rapala Original Floater F11 Silver'
+  }
 }
 
 function processReceipt(text: string, logos: string[]): VisionResult {
@@ -223,7 +282,7 @@ function processReceipt(text: string, logos: string[]): VisionResult {
   
   // Parse receipt text for fishing equipment
   const lines = text.split('\n')
-  const productPattern = /([A-Za-z\s\-]+\w+)\s+(\d+[\.,]\d{2})/
+  const productPattern = /([A-Za-z\s\-]+\w+)\s+(\d+[.,]\d{2})/
   const fishingKeywords = ['wobbler', 'spinner', 'köder', 'lure', 'rute', 'rod', 'rolle', 'reel', 'schnur', 'line', 'haken', 'hook', 'bait', 'rapala', 'mepps', 'berkley']
   
   for (let i = 0; i < lines.length; i++) {
