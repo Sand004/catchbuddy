@@ -20,7 +20,8 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"],
+      "@/*": ["./*"],
+      "@/i18n": ["./i18n.ts"],
       "@catchsmart/ui/*": ["../../packages/ui/*"],
       "@catchsmart/shared/*": ["../../packages/shared/*"]
     }
