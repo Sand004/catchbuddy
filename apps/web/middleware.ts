@@ -1,19 +1,48 @@
-import createMiddleware from 'next-intl/middleware'
+import { createServerClient } from '@supabase/ssr'
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+import createIntlMiddleware from 'next-intl/middleware'
 import { locales, defaultLocale } from './i18n'
 
-export default createMiddleware({
-  // A list of all locales that are supported
+// Create the internationalization middleware
+const intlMiddleware = createIntlMiddleware({
   locales,
-  
-  // Used when no locale matches
   defaultLocale,
-  
-  // Always use a locale prefix in the URL (e.g. /de/about)
   localePrefix: 'always',
-  
-  // Automatically redirect to locale based on Accept-Language header
   localeDetection: true
 })
+
+export async function middleware(request: NextRequest) {
+  // First handle i18n
+  const intlResponse = intlMiddleware(request)
+  
+  // Create a response object
+  const response = intlResponse || NextResponse.next()
+  
+  // Create Supabase client
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll()
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options)
+          )
+        },
+      },
+    }
+  )
+
+  // Refresh session if it exists
+  // This is important for server-side components to have access to the session
+  const { data: { user }, error } = await supabase.auth.getUser()
+
+  return response
+}
 
 export const config = {
   // Match all pathnames except for
