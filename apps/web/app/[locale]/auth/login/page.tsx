@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { Button } from '@catchsmart/ui/src/components/button'
@@ -11,19 +11,24 @@ import { useAuthStore } from '@/lib/stores/auth-store'
 export default function LoginPage() {
   const t = useTranslations()
   const router = useRouter()
+  const params = useParams()
+  const locale = params.locale as string
   const { signInWithEmail, signInWithGoogle, signInWithApple, loading, error } = useAuthStore()
   
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [rememberMe, setRememberMe] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault()
+    setIsSubmitting(true)
     try {
       await signInWithEmail(email, password)
-      router.push('/equipment')
+      router.push(`/${locale}/equipment`)
     } catch (error) {
       // Error is handled in the store
+      setIsSubmitting(false)
     }
   }
 
@@ -66,7 +71,8 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cs-primary focus-visible:ring-offset-2"
+                disabled={loading || isSubmitting}
+                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cs-primary focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 placeholder="name@example.com"
               />
             </div>
@@ -81,7 +87,8 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cs-primary focus-visible:ring-offset-2"
+                disabled={loading || isSubmitting}
+                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cs-primary focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
 
@@ -92,7 +99,8 @@ export default function LoginPage() {
                   type="checkbox"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
-                  className="h-4 w-4 rounded border-input text-cs-primary focus:ring-cs-primary"
+                  disabled={loading || isSubmitting}
+                  className="h-4 w-4 rounded border-input text-cs-primary focus:ring-cs-primary disabled:opacity-50 disabled:cursor-not-allowed"
                 />
                 <label htmlFor="remember-me" className="ml-2 block text-sm">
                   {t('auth.login.rememberMe')}
@@ -100,7 +108,7 @@ export default function LoginPage() {
               </div>
               
               <Link
-                href="/auth/reset-password"
+                href={`/${locale}/auth/reset-password`}
                 className="text-sm text-cs-primary hover:underline"
               >
                 {t('auth.login.forgotPassword')}
@@ -116,7 +124,8 @@ export default function LoginPage() {
             <Button
               type="submit"
               className="w-full"
-              loading={loading}
+              loading={isSubmitting}
+              disabled={loading || isSubmitting}
             >
               {t('auth.login.submit')}
             </Button>
@@ -192,7 +201,7 @@ export default function LoginPage() {
               {t('auth.login.noAccount')}{' '}
             </span>
             <Link
-              href="/auth/register"
+              href={`/${locale}/auth/register`}
               className="text-cs-primary hover:underline font-medium"
             >
               {t('auth.login.signUp')}
