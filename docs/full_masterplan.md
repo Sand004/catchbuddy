@@ -126,7 +126,7 @@ affiliate_clicks (
 
 #### AI-AGENT TASKS
 - [x] AI-001: Next.js PWA Boilerplate mit TypeScript generieren (partially complete - needs auth)
-- [ ] AI-002: Supabase Schema & Migrations erstellen
+- [x] AI-002: Supabase Schema & Migrations erstellen
 - [x] AI-003: Tailwind + shadcn/ui Setup & Theme
 - [x] AI-004: Service Worker für Offline-Funktionalität
 - [x] AI-005: i18n Setup mit next-intl (DE, ES, EN) – COMPLETE ✅
