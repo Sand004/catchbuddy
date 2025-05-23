@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { cookies } from 'next/headers'
-import { createServerClient } from '@supabase/ssr'
-import type { Database } from '@catchsmart/database/types/database'
+import { createClient } from '@/lib/supabase/server'
 
 // Google Vision API configuration
 const GOOGLE_API_KEY = process.env.GOOGLE_CLOUD_API_KEY!
@@ -27,51 +25,22 @@ interface ExtractedItem {
 
 export async function POST(request: NextRequest) {
   console.log('=== Vision API called ===')
-  console.log('Headers:', Object.fromEntries(request.headers.entries()))
   
   try {
-    // Create Supabase client with proper cookie handling
-    const cookieStore = await cookies()
+    // Use the same createClient function as other parts of the app
+    const supabase = await createClient()
     
-    // Debug: Log all cookies
-    const allCookies = cookieStore.getAll()
-    console.log('Available cookies:', allCookies.map(c => ({ name: c.name, hasValue: !!c.value })))
+    // Check authentication
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
     
-    const supabase = createServerClient<Database>(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return allCookies
-          },
-          setAll(cookiesToSet) {
-            try {
-              cookiesToSet.forEach(({ name, value, options }) =>
-                cookieStore.set(name, value, options)
-              )
-            } catch (error) {
-              // The `setAll` method was called from a Server Component.
-              // This can be ignored if you have middleware refreshing
-              // user sessions.
-              console.log('Cookie set error (can be ignored):', error)
-            }
-          },
-        },
-      }
-    )
-    
-    // Check authentication - use getSession instead of getUser for better server-side handling
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-    
-    console.log('Session check:', { 
-      hasSession: !!session, 
-      userId: session?.user?.id,
-      error: sessionError?.message 
+    console.log('Auth check:', { 
+      hasUser: !!user, 
+      userId: user?.id,
+      error: authError?.message 
     })
     
-    if (sessionError || !session) {
-      console.error('Auth failed:', sessionError || 'No session found')
+    if (authError || !user) {
+      console.error('Auth failed:', authError || 'No user found')
       return NextResponse.json(
         { error: 'Unauthorized - Please log in again' }, 
         { status: 401 }
@@ -94,7 +63,7 @@ export async function POST(request: NextRequest) {
     const base64Image = buffer.toString('base64')
 
     // Upload to Supabase Storage
-    const fileName = `${session.user.id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
+    const fileName = `${user.id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
     console.log('Uploading to storage:', fileName)
     
     const { data: uploadData, error: uploadError } = await supabase.storage
