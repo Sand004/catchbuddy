@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
 import { locales } from '@/i18n'
+import { AuthProvider } from '@/components/auth/auth-provider'
 import '../globals.css'
 
 const inter = Inter({
@@ -177,9 +178,11 @@ export default async function LocaleLayout({
       </head>
       <body className="min-h-screen bg-background font-sans antialiased">
         <NextIntlClientProvider messages={messages}>
-          <div className="flex min-h-screen flex-col">
-            {children}
-          </div>
+          <AuthProvider>
+            <div className="flex min-h-screen flex-col">
+              {children}
+            </div>
+          </AuthProvider>
         </NextIntlClientProvider>
       </body>
     </html>
