@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { Button } from '@catchsmart/ui/src/components/button'
@@ -11,6 +11,8 @@ import { useAuthStore } from '@/lib/stores/auth-store'
 export default function RegisterPage() {
   const t = useTranslations()
   const router = useRouter()
+  const params = useParams()
+  const locale = params.locale as string
   const { signUp, signInWithGoogle, signInWithApple, loading, error } = useAuthStore()
   
   const [name, setName] = useState('')
@@ -19,6 +21,7 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [acceptTerms, setAcceptTerms] = useState(false)
   const [validationError, setValidationError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -40,11 +43,13 @@ export default function RegisterPage() {
       return
     }
 
+    setIsSubmitting(true)
     try {
       await signUp(email, password, name)
-      router.push('/equipment')
+      router.push(`/${locale}/equipment`)
     } catch (error) {
       // Error is handled in the store
+      setIsSubmitting(false)
     }
   }
 
@@ -53,6 +58,7 @@ export default function RegisterPage() {
       setValidationError('Bitte akzeptiere die AGB und Datenschutzbestimmungen')
       return
     }
+    setValidationError('')
     try {
       await signInWithGoogle()
     } catch (error) {
@@ -65,6 +71,7 @@ export default function RegisterPage() {
       setValidationError('Bitte akzeptiere die AGB und Datenschutzbestimmungen')
       return
     }
+    setValidationError('')
     try {
       await signInWithApple()
     } catch (error) {
@@ -72,14 +79,16 @@ export default function RegisterPage() {
     }
   }
 
-  const renderTermsText = (text: string) => {
-    return text.split(/(<link>.*?<\/link>)/g).map((part, index) => {
+  const renderTermsText = () => {
+    const termsText = t('auth.register.terms')
+    return termsText.split(/(<link>.*?<\/link>)/g).map((part, index) => {
       if (part.startsWith('<link>') && part.endsWith('</link>')) {
         const linkText = part.replace(/<\/?link>/g, '')
+        const isTermsLink = ['AGB', 'Terms', 'Términos'].includes(linkText)
         return (
           <Link
             key={index}
-            href={linkText === 'AGB' || linkText === 'Terms' || linkText === 'Términos' ? '/terms' : '/privacy'}
+            href={isTermsLink ? `/${locale}/terms` : `/${locale}/privacy`}
             className="text-cs-primary hover:underline"
             target="_blank"
           >
@@ -87,7 +96,7 @@ export default function RegisterPage() {
           </Link>
         )
       }
-      return part
+      return <span key={index}>{part}</span>
     })
   }
 
@@ -114,7 +123,8 @@ export default function RegisterPage() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cs-primary focus-visible:ring-offset-2"
+                disabled={loading || isSubmitting}
+                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cs-primary focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 placeholder="Max Mustermann"
               />
             </div>
@@ -129,7 +139,8 @@ export default function RegisterPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cs-primary focus-visible:ring-offset-2"
+                disabled={loading || isSubmitting}
+                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cs-primary focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 placeholder="name@example.com"
               />
             </div>
@@ -145,7 +156,8 @@ export default function RegisterPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={8}
-                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cs-primary focus-visible:ring-offset-2"
+                disabled={loading || isSubmitting}
+                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cs-primary focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
 
@@ -160,7 +172,8 @@ export default function RegisterPage() {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
                 minLength={8}
-                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cs-primary focus-visible:ring-offset-2"
+                disabled={loading || isSubmitting}
+                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cs-primary focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
               />
             </div>
 
@@ -170,10 +183,11 @@ export default function RegisterPage() {
                 type="checkbox"
                 checked={acceptTerms}
                 onChange={(e) => setAcceptTerms(e.target.checked)}
-                className="h-4 w-4 rounded border-input text-cs-primary focus:ring-cs-primary mt-1"
+                disabled={loading || isSubmitting}
+                className="h-4 w-4 rounded border-input text-cs-primary focus:ring-cs-primary mt-1 disabled:opacity-50 disabled:cursor-not-allowed"
               />
               <label htmlFor="terms" className="ml-2 block text-sm">
-                {renderTermsText(t('auth.register.terms'))}
+                {renderTermsText()}
               </label>
             </div>
 
@@ -186,7 +200,8 @@ export default function RegisterPage() {
             <Button
               type="submit"
               className="w-full"
-              loading={loading}
+              loading={isSubmitting}
+              disabled={loading || isSubmitting}
             >
               {t('auth.register.submit')}
             </Button>
@@ -262,7 +277,7 @@ export default function RegisterPage() {
               {t('auth.register.hasAccount')}{' '}
             </span>
             <Link
-              href="/auth/login"
+              href={`/${locale}/auth/login`}
               className="text-cs-primary hover:underline font-medium"
             >
               {t('auth.register.signIn')}
