@@ -12,6 +12,168 @@
     "save": "Save",
     "cancel": "Cancel",
     "delete": "Delete",
-    "edit": "Edit"
+    "edit": "Edit",
+    "add": "Add",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "yes": "Yes",
+    "no": "No",
+    "confirm": "Confirm",
+    "selectLanguage": "Select Language"
+  },
+  "home": {
+    "hero": {
+      "title": "Catch more with <gradient>AI Power</gradient>",
+      "subtitle": "CatchSmart analyzes weather, location and your equipment to recommend the perfect lures. Like an experienced fishing guide in your pocket.",
+      "cta": {
+        "primary": "Start for free",
+        "secondary": "View demo"
+      }
+    },
+    "features": {
+      "title": "Everything you need for fishing",
+      "subtitle": "From lure management to AI recommendations",
+      "scanner": {
+        "title": "Lure Scanner",
+        "description": "Photograph your lures and have them automatically recognized and categorized"
+      },
+      "ai": {
+        "title": "AI Recommendations",
+        "description": "Get personalized lure recommendations based on weather, location and target fish"
+      },
+      "stats": {
+        "title": "Catch Statistics",
+        "description": "Track your success and learn from past catches for better results"
+      }
+    },
+    "pricing": {
+      "title": "Simple pricing",
+      "subtitle": "Start free and upgrade when you need more",
+      "free": {
+        "name": "Hobby Angler",
+        "price": "$0",
+        "period": "/month",
+        "features": [
+          "Manage 10 lures",
+          "2 AI recommendations/day",
+          "Basic statistics"
+        ]
+      },
+      "pro": {
+        "name": "Pro Angler",
+        "price": "$4.99",
+        "period": "/month",
+        "badge": "POPULAR",
+        "features": [
+          "Manage 100 lures",
+          "20 AI recommendations/day",
+          "Advanced statistics"
+        ]
+      },
+      "premium": {
+        "name": "Master Angler",
+        "price": "$9.99",
+        "period": "/month",
+        "features": [
+          "Unlimited lures",
+          "Unlimited AI recommendations",
+          "Premium support & features"
+        ]
+      }
+    },
+    "cta": {
+      "title": "Ready for more fishing success?",
+      "subtitle": "Join thousands of anglers already fishing more successfully with CatchSmart.",
+      "button": "Start free now",
+      "disclaimer": "No credit card required • 10 lures free"
+    }
+  },
+  "equipment": {
+    "title": "My Equipment",
+    "empty": {
+      "title": "No equipment yet",
+      "description": "Add your first lure to get personalized recommendations.",
+      "cta": "Add first lure"
+    },
+    "add": {
+      "title": "Add lure",
+      "scan": "Scan lure",
+      "manual": "Enter manually"
+    },
+    "types": {
+      "lure": "Lure",
+      "rod": "Rod",
+      "reel": "Reel",
+      "line": "Line",
+      "bait": "Bait",
+      "tackle": "Tackle",
+      "other": "Other"
+    },
+    "fields": {
+      "name": "Name",
+      "type": "Type",
+      "brand": "Brand",
+      "model": "Model",
+      "color": "Color",
+      "size": "Size",
+      "weight": "Weight",
+      "notes": "Notes",
+      "favorite": "Favorite"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome back",
+      "subtitle": "Sign in to continue",
+      "email": "Email",
+      "password": "Password",
+      "rememberMe": "Remember me",
+      "forgotPassword": "Forgot password?",
+      "submit": "Sign in",
+      "noAccount": "Don't have an account?",
+      "signUp": "Sign up now"
+    },
+    "register": {
+      "title": "Create account",
+      "subtitle": "Start free with CatchSmart",
+      "name": "Name",
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm password",
+      "terms": "I accept the <link>Terms</link> and <link>Privacy Policy</link>",
+      "submit": "Sign up",
+      "hasAccount": "Already registered?",
+      "signIn": "Sign in now"
+    },
+    "reset": {
+      "title": "Reset password",
+      "subtitle": "We'll send you a reset link",
+      "email": "Email",
+      "submit": "Send link",
+      "backToLogin": "Back to login",
+      "success": "Check your email for the reset link"
+    }
+  },
+  "errors": {
+    "general": "An error occurred",
+    "network": "No internet connection",
+    "auth": {
+      "invalidCredentials": "Invalid credentials",
+      "emailInUse": "Email already in use",
+      "weakPassword": "Password too weak",
+      "userNotFound": "User not found"
+    },
+    "validation": {
+      "required": "This field is required",
+      "email": "Invalid email address",
+      "minLength": "At least {min} characters required",
+      "maxLength": "Maximum {max} characters allowed",
+      "passwordMatch": "Passwords don't match"
+    }
   }
 }
