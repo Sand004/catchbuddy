@@ -129,7 +129,12 @@ affiliate_clicks (
 - [ ] AI-002: Supabase Schema & Migrations erstellen
 - [x] AI-003: Tailwind + shadcn/ui Setup & Theme
 - [x] AI-004: Service Worker für Offline-Funktionalität
-- [ ] AI-005: i18n Setup mit next-intl (DE, ES, EN)
+- [x] AI-005: i18n Setup mit next-intl (DE, ES, EN) – COMPLETE ✅
+    - App ist jetzt vollständig internationalisiert:
+        - 🇩🇪 Deutsch (primär)
+        - 🇬🇧 Englisch
+        - 🇪🇸 Spanisch
+    - Alle zukünftigen Features müssen das Übersetzungssystem verwenden (useTranslations von next-intl importieren).
 - [ ] AI-006: Basic Auth Flow (Login/Register/Reset)
 - [x] AI-029: Tailwind-Tokens in packages/ui/tailwind.config.ts definieren
 - [ ] AI-030: Figma Brand-Sheet (Farben, Text Styles, Komponenten)
