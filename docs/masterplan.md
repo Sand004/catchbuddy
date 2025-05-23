@@ -46,3 +46,6 @@
 **Status:** AI-001 (partially), AI-003, AI-004, AI-029 = COMPLETE (siehe full_masterplan.md)
 
 *Vollständiger Master-Plan siehe: [Original Dokument](../catchsmart-masterplan.md)*
+
+## Dependencies Added:
+- @supabase/ssr (for server-side auth)

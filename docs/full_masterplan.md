@@ -135,7 +135,8 @@ affiliate_clicks (
         - 🇬🇧 Englisch
         - 🇪🇸 Spanisch
     - Alle zukünftigen Features müssen das Übersetzungssystem verwenden (useTranslations von next-intl importieren).
-- [ ] AI-006: Basic Auth Flow (Login/Register/Reset)
+- [x] AI-006: Basic Auth Flow (Login/Register/Reset) – COMPLETE ✅
+- [x] AI-006: Complete auth system with email, Google, and Apple login
 - [x] AI-029: Tailwind-Tokens in packages/ui/tailwind.config.ts definieren
 - [ ] AI-030: Figma Brand-Sheet (Farben, Text Styles, Komponenten)
 - [ ] AI-031: Storybook mit Button, Card, Chart Showcase
@@ -522,3 +523,6 @@ Hilfsbereit – klare Tooltips, Micro‑Copy.
 Naturverbunden – subtile Wasser‑/Grün‑Akzente; keine Neon‑Reizüberflutung.
 
 Dieser Plan ist als "Living Document" konzipiert und wird kontinuierlich von AI-Agenten und dem Team erweitert. Alle Tasks sind so strukturiert, dass sie unabhängig bearbeitet werden können.
+
+## Dependencies Added:
+- @supabase/ssr (for server-side auth)
