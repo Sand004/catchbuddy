@@ -1,0 +1,29 @@
+{
+  "name": "@catchsmart/mobile",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "npm run sync:ios && npm run sync:android",
+    "dev": "cap serve",
+    "sync:ios": "cap sync ios",
+    "sync:android": "cap sync android",
+    "open:ios": "cap open ios",
+    "open:android": "cap open android",
+    "clean": "rm -rf ios android"
+  },
+  "dependencies": {
+    "@capacitor/core": "^5.7.4",
+    "@capacitor/ios": "^5.7.4",
+    "@capacitor/android": "^5.7.4",
+    "@capacitor/cli": "^5.7.4",
+    "@capacitor/camera": "^5.0.9",
+    "@capacitor/geolocation": "^5.0.7",
+    "@capacitor/device": "^5.0.7",
+    "@capacitor/app": "^5.0.7",
+    "@capacitor/haptics": "^5.0.7",
+    "@capacitor/keyboard": "^5.0.8",
+    "@capacitor/status-bar": "^5.0.7",
+    "@capacitor/splash-screen": "^5.0.7",
+    "@capacitor/push-notifications": "^5.1.0"
+  }
+}
