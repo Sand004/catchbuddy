@@ -125,13 +125,13 @@ affiliate_clicks (
 - [X] MAN-006: Domain registrieren & DNS Setup
 
 #### AI-AGENT TASKS
-- [x] AI-001: Next.js PWA Boilerplate mit TypeScript generieren
+- [x] AI-001: Next.js PWA Boilerplate mit TypeScript generieren (partially complete - needs auth)
 - [ ] AI-002: Supabase Schema & Migrations erstellen
-- [ ] AI-003: Tailwind + shadcn/ui Setup & Theme
-- [ ] AI-004: Service Worker für Offline-Funktionalität
+- [x] AI-003: Tailwind + shadcn/ui Setup & Theme
+- [x] AI-004: Service Worker für Offline-Funktionalität
 - [ ] AI-005: i18n Setup mit next-intl (DE, ES, EN)
 - [ ] AI-006: Basic Auth Flow (Login/Register/Reset)
-- [ ] AI-029: Tailwind-Tokens in packages/ui/tailwind.config.ts definieren
+- [x] AI-029: Tailwind-Tokens in packages/ui/tailwind.config.ts definieren
 - [ ] AI-030: Figma Brand-Sheet (Farben, Text Styles, Komponenten)
 - [ ] AI-031: Storybook mit Button, Card, Chart Showcase
 

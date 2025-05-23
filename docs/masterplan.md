@@ -43,4 +43,6 @@
 - AI-030: Figma Brand-Sheet (Farben, Text Styles, Komponenten)
 - AI-031: Storybook mit Button, Card, Chart Showcase
 
+**Status:** AI-001 (partially), AI-003, AI-004, AI-029 = COMPLETE (siehe full_masterplan.md)
+
 *Vollständiger Master-Plan siehe: [Original Dokument](../catchsmart-masterplan.md)*
