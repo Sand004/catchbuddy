@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { cookies } from 'next/headers'
+import { createServerClient } from '@supabase/ssr'
+import type { Database } from '@catchsmart/database/types/database'
 
 // Google Vision API configuration
 const GOOGLE_API_KEY = process.env.GOOGLE_CLOUD_API_KEY!
@@ -24,13 +26,41 @@ interface ExtractedItem {
 }
 
 export async function POST(request: NextRequest) {
+  console.log('Vision API called')
+  
   try {
-    // Check authentication - Fix: use await for async createClient
-    const supabase = await createClient()
+    // Create Supabase client with proper cookie handling
+    const cookieStore = await cookies()
+    const supabase = createServerClient<Database>(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return cookieStore.getAll()
+          },
+          setAll(cookiesToSet) {
+            try {
+              cookiesToSet.forEach(({ name, value, options }) =>
+                cookieStore.set(name, value, options)
+              )
+            } catch {
+              // The `setAll` method was called from a Server Component.
+              // This can be ignored if you have middleware refreshing
+              // user sessions.
+            }
+          },
+        },
+      }
+    )
+    
+    // Check authentication
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     
+    console.log('Auth check:', { userId: user?.id, error: authError?.message })
+    
     if (authError || !user) {
-      console.error('Auth error:', authError)
+      console.error('Auth failed:', authError)
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -41,6 +71,8 @@ export async function POST(request: NextRequest) {
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 })
     }
+
+    console.log('Processing file:', file.name, 'Size:', file.size)
 
     // Convert file to base64 for Google Vision API
     const bytes = await file.arrayBuffer()
@@ -57,9 +89,11 @@ export async function POST(request: NextRequest) {
       })
 
     if (uploadError) {
-      console.error('Upload error:', uploadError)
+      console.error('Storage upload error:', uploadError)
       throw new Error(`Upload failed: ${uploadError.message}`)
     }
+
+    console.log('File uploaded successfully:', fileName)
 
     // Get public URL
     const { data: { publicUrl } } = supabase.storage
@@ -70,16 +104,18 @@ export async function POST(request: NextRequest) {
     let visionResult: VisionResult
 
     if (GOOGLE_API_KEY) {
-      // Production: Use Google Vision API
+      console.log('Processing with Google Vision API...')
       visionResult = await processWithGoogleVision(base64Image)
     } else {
-      // Development: Use mock data
       console.warn('Google Vision API key not configured, using mock data')
       visionResult = await processWithMockData(base64Image)
     }
 
+    console.log('Vision processing complete:', visionResult)
+
     // Use Brave Search to find product images for extracted items
-    if (BRAVE_API_KEY) {
+    if (BRAVE_API_KEY && visionResult.items.length > 0) {
+      console.log('Searching for product images...')
       for (const item of visionResult.items) {
         if (!item.imageUrl && item.name) {
           item.imageUrl = await findProductImage(item)
@@ -87,11 +123,15 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({
+    const response = {
       success: true,
       imageUrl: publicUrl,
       vision: visionResult,
-    })
+    }
+
+    console.log('Sending response:', response)
+
+    return NextResponse.json(response)
 
   } catch (error) {
     console.error('Vision API error:', error)
@@ -104,6 +144,8 @@ export async function POST(request: NextRequest) {
 
 async function processWithGoogleVision(base64Image: string): Promise<VisionResult> {
   try {
+    console.log('Calling Google Vision API...')
+    
     // Call Google Vision REST API
     const response = await fetch(
       `https://vision.googleapis.com/v1/images:annotate?key=${GOOGLE_API_KEY}`,
@@ -126,11 +168,19 @@ async function processWithGoogleVision(base64Image: string): Promise<VisionResul
 
     if (!response.ok) {
       const error = await response.json()
+      console.error('Google Vision API error:', error)
       throw new Error(`Google Vision API error: ${error.error?.message || response.statusText}`)
     }
 
     const data = await response.json()
     const result = data.responses[0]
+
+    console.log('Vision API response:', {
+      hasText: !!result.textAnnotations?.length,
+      hasLabels: !!result.labelAnnotations?.length,
+      hasLogos: !!result.logoAnnotations?.length,
+      hasObjects: !!result.localizedObjectAnnotations?.length
+    })
 
     // Extract text
     const fullText = result.textAnnotations?.[0]?.description || ''
@@ -146,6 +196,8 @@ async function processWithGoogleVision(base64Image: string): Promise<VisionResul
                      labels.includes('receipt') ||
                      labels.includes('document')
 
+    console.log('Document type:', isReceipt ? 'receipt' : 'lure', 'Text found:', fullText.substring(0, 100))
+
     if (isReceipt) {
       return processReceipt(fullText, logos)
     } else {
@@ -160,11 +212,13 @@ async function processWithGoogleVision(base64Image: string): Promise<VisionResul
 
 async function processWithMockData(base64Image: string): Promise<VisionResult> {
   // Mock implementation for development
+  console.log('Using mock data for testing')
   const mockText = "Rapala Original Floater F11 Silver 11cm"
   return processLureImage(mockText, ['fishing lure', 'wobbler'], ['Rapala'])
 }
 
 function processReceipt(text: string, logos: string[]): VisionResult {
+  console.log('Processing receipt...')
   const items: ExtractedItem[] = []
   
   // Parse receipt text for fishing equipment
@@ -202,9 +256,12 @@ function processReceipt(text: string, logos: string[]): VisionResult {
         }
         
         items.push(item)
+        console.log('Found product:', item)
       }
     }
   }
+  
+  console.log(`Found ${items.length} products in receipt`)
   
   return {
     type: 'receipt',
@@ -214,6 +271,7 @@ function processReceipt(text: string, logos: string[]): VisionResult {
 }
 
 function processLureImage(text: string, labels: string[], logos: string[]): VisionResult {
+  console.log('Processing lure image...')
   const items: ExtractedItem[] = []
   
   // Extract brand from logos
@@ -248,6 +306,7 @@ function processLureImage(text: string, labels: string[], logos: string[]): Visi
   }
   
   items.push(item)
+  console.log('Extracted lure:', item)
   
   return {
     type: 'lure',
@@ -274,6 +333,7 @@ async function findProductImage(item: ExtractedItem): Promise<string | undefined
   try {
     // Build search query
     const searchQuery = `${item.brand || ''} ${item.name} ${item.model || ''} fishing lure product image`.trim()
+    console.log('Searching for product image:', searchQuery)
     
     // Search using Brave API
     const url = new URL('https://api.search.brave.com/res/v1/images/search')
@@ -297,6 +357,8 @@ async function findProductImage(item: ExtractedItem): Promise<string | undefined
     
     // Find the best image result
     const results = data.results || []
+    console.log(`Found ${results.length} image results`)
+    
     for (const result of results) {
       // Prefer images from known fishing retailers or manufacturer sites
       const trustedDomains = [
@@ -308,6 +370,7 @@ async function findProductImage(item: ExtractedItem): Promise<string | undefined
       try {
         const url = new URL(result.url || '')
         if (trustedDomains.some(domain => url.hostname.includes(domain))) {
+          console.log('Found trusted image:', url.hostname)
           return result.thumbnail?.src || result.url
         }
       } catch (e) {
@@ -316,7 +379,11 @@ async function findProductImage(item: ExtractedItem): Promise<string | undefined
     }
     
     // Return first result if no trusted domain found
-    return results[0]?.thumbnail?.src || results[0]?.url
+    const imageUrl = results[0]?.thumbnail?.src || results[0]?.url
+    if (imageUrl) {
+      console.log('Using first available image')
+    }
+    return imageUrl
     
   } catch (error) {
     console.error('Product image search failed:', error)
