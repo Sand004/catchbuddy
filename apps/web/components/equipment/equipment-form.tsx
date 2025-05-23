@@ -55,15 +55,9 @@ export function EquipmentForm({
       const validatedData = equipmentFormSchema.parse(formData)
       
       if (editMode && equipmentId) {
-        await updateEquipment(equipmentId, {
-          ...validatedData,
-          is_favorite: validatedData.isFavorite,
-        })
+        await updateEquipment(equipmentId, validatedData)
       } else {
-        await addEquipment({
-          ...validatedData,
-          is_favorite: validatedData.isFavorite,
-        })
+        await addEquipment(validatedData)
       }
       
       onSuccess?.()
@@ -164,7 +158,7 @@ export function EquipmentForm({
               <input
                 id="brand"
                 type="text"
-                value={formData.brand}
+                value={formData.brand || ''}
                 onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
                 className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
                 placeholder="z.B. Rapala"
@@ -179,7 +173,7 @@ export function EquipmentForm({
               <input
                 id="model"
                 type="text"
-                value={formData.model}
+                value={formData.model || ''}
                 onChange={(e) => setFormData({ ...formData, model: e.target.value })}
                 className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
                 placeholder="z.B. Original Floater F11"
@@ -194,7 +188,7 @@ export function EquipmentForm({
               <input
                 id="color"
                 type="text"
-                value={formData.color}
+                value={formData.color || ''}
                 onChange={(e) => setFormData({ ...formData, color: e.target.value })}
                 className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
                 placeholder="z.B. Silber"
@@ -209,7 +203,7 @@ export function EquipmentForm({
               <input
                 id="size"
                 type="text"
-                value={formData.size}
+                value={formData.size || ''}
                 onChange={(e) => setFormData({ ...formData, size: e.target.value })}
                 className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
                 placeholder="z.B. 11cm"
@@ -311,7 +305,7 @@ export function EquipmentForm({
             </label>
             <textarea
               id="notes"
-              value={formData.notes}
+              value={formData.notes || ''}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm min-h-[100px]"
               placeholder="Zusätzliche Notizen..."
