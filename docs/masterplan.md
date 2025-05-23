@@ -38,14 +38,29 @@
 - **CI/CD**: GitHub Actions
 - **Payments**: RevenueCat (iOS/Android) + Stripe (Web)
 
-### Neue Tasks Phase 1 (2025)
-- AI-029: Tailwind-Tokens in packages/ui/tailwind.config.ts definieren
-- AI-030: Figma Brand-Sheet (Farben, Text Styles, Komponenten)
-- AI-031: Storybook mit Button, Card, Chart Showcase
+## 📊 Development Progress
 
-**Status:** AI-001 (partially), AI-003, AI-004, AI-029 = COMPLETE (siehe full_masterplan.md)
+### Phase 1: Foundation ✅ COMPLETE
+- ✅ AI-001: Next.js PWA Boilerplate 
+- ✅ AI-002: Supabase Schema & Migrations
+- ✅ AI-003: Tailwind + shadcn/ui Setup
+- ✅ AI-004: Service Worker für Offline
+- ✅ AI-005: i18n Setup (DE, ES, EN)
+- ✅ AI-006: Basic Auth Flow
+- ✅ AI-029: Tailwind Design Tokens
+- ⏳ AI-030: Figma Brand-Sheet (optional)
+- ⏳ AI-031: Storybook (optional)
 
-*Vollständiger Master-Plan siehe: [Original Dokument](../catchsmart-masterplan.md)*
+### Phase 2: Core Features 🚧 IN PROGRESS
+- ✅ AI-007: Equipment Management UI (CRUD) - **COMPLETE 2025-05-23**
+- [ ] AI-008: Image Upload & Google Vision Integration
+- [ ] AI-009: Receipt Parser für automatisches Equipment-Import
+- [ ] AI-010: Equipment-Galerie mit Filter & Suche
+- [ ] AI-011: Offline-Sync Logic mit Conflict Resolution
+- [ ] AI-012: Equipment Embedding Generation Pipeline
+
+*Vollständiger Master-Plan siehe: [Full Masterplan](./full_masterplan.md)*
 
 ## Dependencies Added:
 - @supabase/ssr (for server-side auth)
+- zod (for form validation)
