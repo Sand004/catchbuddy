@@ -1,17 +1,57 @@
 {
-  "name": "CatchSmart - Angel Assistent",
+  "name": "CatchSmart - KI Angel-Assistent",
   "short_name": "CatchSmart",
   "description": "KI-gestützte Angel-App mit personalisierten Köderempfehlungen",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#3b82f6",
+  "background_color": "#0F1B2B",
+  "theme_color": "#0F1B2B",
   "orientation": "portrait",
-  "categories": ["sports", "lifestyle"],
+  "categories": ["sports", "lifestyle", "productivity"],
+  "dir": "ltr",
+  "lang": "de-DE",
+  "prefer_related_applications": false,
   "icons": [
+    {
+      "src": "/icons/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
     {
       "src": "/icons/icon-192x192.png",
       "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icons/icon-384x384.png",
+      "sizes": "384x384",
       "type": "image/png",
       "purpose": "maskable any"
     },
@@ -24,10 +64,82 @@
   ],
   "screenshots": [
     {
-      "src": "/screenshots/mobile-1.png",
+      "src": "/screenshots/mobile-1.jpg",
       "sizes": "390x844",
-      "type": "image/png",
-      "form_factor": "narrow"
+      "type": "image/jpeg",
+      "platform": "narrow",
+      "label": "CatchSmart Startseite"
+    },
+    {
+      "src": "/screenshots/mobile-2.jpg",
+      "sizes": "390x844",
+      "type": "image/jpeg",
+      "platform": "narrow",
+      "label": "Köder-Verwaltung"
+    },
+    {
+      "src": "/screenshots/mobile-3.jpg",
+      "sizes": "390x844",
+      "type": "image/jpeg",
+      "platform": "narrow",
+      "label": "KI-Empfehlungen"
+    },
+    {
+      "src": "/screenshots/desktop-1.jpg",
+      "sizes": "1920x1080",
+      "type": "image/jpeg",
+      "platform": "wide",
+      "label": "CatchSmart Desktop"
     }
-  ]
+  ],
+  "shortcuts": [
+    {
+      "name": "Neue Empfehlung",
+      "short_name": "Empfehlung",
+      "description": "KI-Köderempfehlung erhalten",
+      "url": "/assistant?action=new",
+      "icons": [{ "src": "/icons/shortcut-ai.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Köder hinzufügen",
+      "short_name": "Köder+",
+      "description": "Neuen Köder zur Sammlung hinzufügen",
+      "url": "/equipment/add",
+      "icons": [{ "src": "/icons/shortcut-add.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Fang eintragen",
+      "short_name": "Fang+",
+      "description": "Neuen Fang dokumentieren",
+      "url": "/catches/add",
+      "icons": [{ "src": "/icons/shortcut-catch.png", "sizes": "96x96" }]
+    }
+  ],
+  "related_applications": [
+    {
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id=com.catchsmart.app",
+      "id": "com.catchsmart.app"
+    },
+    {
+      "platform": "itunes",
+      "url": "https://apps.apple.com/app/catchsmart/id1234567890"
+    }
+  ],
+  "share_target": {
+    "action": "/share",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url",
+      "files": [
+        {
+          "name": "image",
+          "accept": ["image/*"]
+        }
+      ]
+    }
+  }
 }
