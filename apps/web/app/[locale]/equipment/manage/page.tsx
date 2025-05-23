@@ -34,13 +34,29 @@ export default function EquipmentManagementPage() {
   const [extractedItems, setExtractedItems] = useState<ExtractedItem[]>([])
   const [searchQuery, setSearchQuery] = useState('')
   const [uploadError, setUploadError] = useState<string | null>(null)
+  const [authStatus, setAuthStatus] = useState<any>(null)
 
   // Load equipment on mount
   useEffect(() => {
     if (user) {
       loadEquipment()
+      // Test auth status when component mounts
+      testAuthStatus()
     }
   }, [user])
+
+  const testAuthStatus = async () => {
+    try {
+      const response = await fetch('/api/auth/test', {
+        credentials: 'include'
+      })
+      const data = await response.json()
+      setAuthStatus(data)
+      console.log('Auth status:', data)
+    } catch (error) {
+      console.error('Auth test failed:', error)
+    }
+  }
 
   const loadEquipment = async () => {
     const supabase = createClient()
@@ -323,6 +339,18 @@ export default function EquipmentManagementPage() {
           {t('equipment.add.title')}
         </Button>
       </div>
+
+      {/* Debug Auth Status - Remove in production */}
+      {authStatus && process.env.NODE_ENV === 'development' && (
+        <Card className="mb-6 bg-muted/50">
+          <CardHeader>
+            <CardTitle className="text-sm">Auth Debug Info</CardTitle>
+          </CardHeader>
+          <CardContent className="text-xs font-mono">
+            <pre>{JSON.stringify(authStatus, null, 2)}</pre>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Search and Filter */}
       <div className="mb-6 flex gap-4">
