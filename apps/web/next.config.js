@@ -1,29 +1,14 @@
-const withPWA = require('next-pwa')({
-  dest: 'public',
-  register: true,
-  skipWaiting: true,
-  disable: process.env.NODE_ENV === 'development'
-})
-
-const createNextIntlPlugin = require('next-intl/plugin')
-const withNextIntl = createNextIntlPlugin()
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    typedRoutes: true,
-  },
+  reactStrictMode: true,
+  swcMinify: true,
   images: {
     domains: [
-      'supabase.co',
-      'your-supabase-project.supabase.co',
-      'images.unsplash.com',
-      'res.cloudinary.com'
+      'localhost',
+      'catchsmart.app',
     ],
   },
-  env: {
-    CUSTOM_KEY: 'my-value',
-  },
+  // PWA config will be added later with next-pwa
 }
 
-module.exports = withNextIntl(withPWA(nextConfig))
+module.exports = nextConfig
