@@ -12,6 +12,168 @@
     "save": "Guardar",
     "cancel": "Cancelar",
     "delete": "Eliminar",
-    "edit": "Editar"
+    "edit": "Editar",
+    "add": "Añadir",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "sort": "Ordenar",
+    "close": "Cerrar",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "yes": "Sí",
+    "no": "No",
+    "confirm": "Confirmar",
+    "selectLanguage": "Seleccionar idioma"
+  },
+  "home": {
+    "hero": {
+      "title": "Pesca más con <gradient>Poder de IA</gradient>",
+      "subtitle": "CatchSmart analiza el clima, la ubicación y tu equipo para recomendar los señuelos perfectos. Como un guía de pesca experimentado en tu bolsillo.",
+      "cta": {
+        "primary": "Empezar gratis",
+        "secondary": "Ver demo"
+      }
+    },
+    "features": {
+      "title": "Todo lo que necesitas para pescar",
+      "subtitle": "Desde la gestión de señuelos hasta recomendaciones de IA",
+      "scanner": {
+        "title": "Escáner de Señuelos",
+        "description": "Fotografía tus señuelos y haz que se reconozcan y categoricen automáticamente"
+      },
+      "ai": {
+        "title": "Recomendaciones de IA",
+        "description": "Obtén recomendaciones personalizadas de señuelos basadas en el clima, ubicación y pez objetivo"
+      },
+      "stats": {
+        "title": "Estadísticas de Capturas",
+        "description": "Rastrea tu éxito y aprende de capturas pasadas para mejores resultados"
+      }
+    },
+    "pricing": {
+      "title": "Precios simples",
+      "subtitle": "Empieza gratis y actualiza cuando necesites más",
+      "free": {
+        "name": "Pescador Aficionado",
+        "price": "0€",
+        "period": "/mes",
+        "features": [
+          "Gestionar 10 señuelos",
+          "2 recomendaciones IA/día",
+          "Estadísticas básicas"
+        ]
+      },
+      "pro": {
+        "name": "Pescador Pro",
+        "price": "4,99€",
+        "period": "/mes",
+        "badge": "POPULAR",
+        "features": [
+          "Gestionar 100 señuelos",
+          "20 recomendaciones IA/día",
+          "Estadísticas avanzadas"
+        ]
+      },
+      "premium": {
+        "name": "Maestro Pescador",
+        "price": "9,99€",
+        "period": "/mes",
+        "features": [
+          "Señuelos ilimitados",
+          "Recomendaciones IA ilimitadas",
+          "Soporte premium y funciones"
+        ]
+      }
+    },
+    "cta": {
+      "title": "¿Listo para más éxito en la pesca?",
+      "subtitle": "Únete a miles de pescadores que ya pescan con más éxito con CatchSmart.",
+      "button": "Empezar gratis ahora",
+      "disclaimer": "No se requiere tarjeta de crédito • 10 señuelos gratis"
+    }
+  },
+  "equipment": {
+    "title": "Mi Equipo",
+    "empty": {
+      "title": "Sin equipo aún",
+      "description": "Añade tu primer señuelo para obtener recomendaciones personalizadas.",
+      "cta": "Añadir primer señuelo"
+    },
+    "add": {
+      "title": "Añadir señuelo",
+      "scan": "Escanear señuelo",
+      "manual": "Introducir manualmente"
+    },
+    "types": {
+      "lure": "Señuelo",
+      "rod": "Caña",
+      "reel": "Carrete",
+      "line": "Línea",
+      "bait": "Cebo",
+      "tackle": "Aparejo",
+      "other": "Otro"
+    },
+    "fields": {
+      "name": "Nombre",
+      "type": "Tipo",
+      "brand": "Marca",
+      "model": "Modelo",
+      "color": "Color",
+      "size": "Tamaño",
+      "weight": "Peso",
+      "notes": "Notas",
+      "favorite": "Favorito"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Bienvenido de nuevo",
+      "subtitle": "Inicia sesión para continuar",
+      "email": "Correo electrónico",
+      "password": "Contraseña",
+      "rememberMe": "Recuérdame",
+      "forgotPassword": "¿Olvidaste tu contraseña?",
+      "submit": "Iniciar sesión",
+      "noAccount": "¿No tienes cuenta?",
+      "signUp": "Regístrate ahora"
+    },
+    "register": {
+      "title": "Crear cuenta",
+      "subtitle": "Empieza gratis con CatchSmart",
+      "name": "Nombre",
+      "email": "Correo electrónico",
+      "password": "Contraseña",
+      "confirmPassword": "Confirmar contraseña",
+      "terms": "Acepto los <link>Términos</link> y la <link>Política de Privacidad</link>",
+      "submit": "Registrarse",
+      "hasAccount": "¿Ya registrado?",
+      "signIn": "Inicia sesión ahora"
+    },
+    "reset": {
+      "title": "Restablecer contraseña",
+      "subtitle": "Te enviaremos un enlace de restablecimiento",
+      "email": "Correo electrónico",
+      "submit": "Enviar enlace",
+      "backToLogin": "Volver al inicio de sesión",
+      "success": "Revisa tu correo para el enlace de restablecimiento"
+    }
+  },
+  "errors": {
+    "general": "Ocurrió un error",
+    "network": "Sin conexión a internet",
+    "auth": {
+      "invalidCredentials": "Credenciales inválidas",
+      "emailInUse": "Correo ya en uso",
+      "weakPassword": "Contraseña demasiado débil",
+      "userNotFound": "Usuario no encontrado"
+    },
+    "validation": {
+      "required": "Este campo es obligatorio",
+      "email": "Dirección de correo inválida",
+      "minLength": "Se requieren al menos {min} caracteres",
+      "maxLength": "Máximo {max} caracteres permitidos",
+      "passwordMatch": "Las contraseñas no coinciden"
+    }
   }
 }
