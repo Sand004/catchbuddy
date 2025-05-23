@@ -1,0 +1,17 @@
+{
+  "navigation": {
+    "home": "Start",
+    "equipment": "Ausrüstung",
+    "catches": "Fänge",
+    "assistant": "Assistent",
+    "profile": "Profil"
+  },
+  "common": {
+    "loading": "Lädt...",
+    "error": "Fehler",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "edit": "Bearbeiten"
+  }
+}

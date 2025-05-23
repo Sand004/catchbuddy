@@ -1,0 +1,17 @@
+{
+  "navigation": {
+    "home": "Home",
+    "equipment": "Equipment",
+    "catches": "Catches",
+    "assistant": "Assistant",
+    "profile": "Profile"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit"
+  }
+}

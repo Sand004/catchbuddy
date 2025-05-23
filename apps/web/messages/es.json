@@ -1,0 +1,17 @@
+{
+  "navigation": {
+    "home": "Inicio",
+    "equipment": "Equipo",
+    "catches": "Capturas",
+    "assistant": "Asistente",
+    "profile": "Perfil"
+  },
+  "common": {
+    "loading": "Cargando...",
+    "error": "Error",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar"
+  }
+}
